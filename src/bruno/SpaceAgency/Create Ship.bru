@@ -1,0 +1,24 @@
+meta {
+  name: Create Ship
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/api/ship
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "toto",
+    "capacity": 15,
+    "maxWeight": 700
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

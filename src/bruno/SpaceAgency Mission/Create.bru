@@ -1,0 +1,28 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/api/missions
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "shipId": 4,
+    "departureDate": "2026-01-19T12:42:00",
+    "arrivalDate": "2026-01-19T20:42:00",
+    "origin": "Pluton",
+    "destination": "Neptune",
+    "status": "PLANNED",
+    "maxPassengers": 1
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

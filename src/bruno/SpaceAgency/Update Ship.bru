@@ -1,0 +1,25 @@
+meta {
+  name: Update Ship
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/api/ship
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 4,
+    "name": "tata",
+    "capacity": 15,
+    "maxWeight": 700
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

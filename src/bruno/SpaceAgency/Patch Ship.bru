@@ -1,0 +1,24 @@
+meta {
+  name: Patch Ship
+  type: http
+  seq: 7
+}
+
+patch {
+  url: http://localhost:8080/api/ship/4
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "tati",
+    "capacity": 3,
+    "maxWeight": 700
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

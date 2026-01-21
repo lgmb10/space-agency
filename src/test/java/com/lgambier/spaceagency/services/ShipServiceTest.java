@@ -37,6 +37,10 @@ public class ShipServiceTest {
 
     ShipService shipService;
 
+    PassengerService passengerService;
+
+    BookingService bookingService;
+
     MissionService missionService;
 
     JsonMapper jsonMapper;
@@ -45,7 +49,7 @@ public class ShipServiceTest {
     @BeforeEach
     void setUp() {
         shipService = new ShipService(shipRepository, missionRepository, timeProvider);
-        missionService = new MissionService(missionRepository, jsonMapper);
+        missionService = new MissionService(missionRepository, shipService, passengerService, bookingService, jsonMapper);
     }
 
     @Test

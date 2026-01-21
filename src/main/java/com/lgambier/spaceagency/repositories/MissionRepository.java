@@ -17,6 +17,7 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
                 WHERE m.ship.id = :shipId
                 AND m.departureDate < :arrivalDate
                 AND m.arrivalDate > :departureDate
+                AND m.status != "CANCELLED"
             """)
     boolean existsOverlappingMission(@Param("shipId") Integer shipId, @Param("departureDate") LocalDateTime departureDate, @Param("arrivalDate") LocalDateTime arrivalDate);
 

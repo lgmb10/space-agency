@@ -3,9 +3,11 @@ package com.lgambier.spaceagency.services;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
+import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.enums.MissionStatus;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceeds;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUse;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUseException;
+import com.lgambier.spaceagency.exceptions.mission.MissionTransitionException;
 import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
@@ -14,8 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,9 +33,11 @@ public class MissionServiceTest {
 
     MissionService missionService;
 
+    JsonMapper jsonMapper;
+
     @BeforeEach
     void setUp() {
-        missionService = new MissionService(missionRepository);
+        missionService = new MissionService(missionRepository, jsonMapper);
     }
 
     @Test
@@ -103,7 +109,7 @@ public class MissionServiceTest {
 
 
         assertThrows(
-                MissionShipCapacityExceeds.class,
+                MissionShipCapacityExceedsException.class,
                 () -> missionService.create(request, ShipDTO.toShip(ship))
         );
 
@@ -139,10 +145,72 @@ public class MissionServiceTest {
         )).thenReturn(true);
 
         assertThrows(
-                MissionShipTimeSlotAlreadyInUse.class,
+                MissionShipTimeSlotAlreadyInUseException.class,
                 () -> missionService.create(request, ShipDTO.toShip(ship))
         );
 
+        verify(missionRepository, never()).save(any());
+    }
+
+    @Test
+    void patchStatus_shouldUpdateStatus_whenTransitionIsValid() {
+        LocalDateTime departure = LocalDateTime.now().minusHours(1);
+        Mission mission = Mission.builder()
+                .id(1)
+                .status(MissionStatus.PLANNED)
+                .departureDate(departure)
+                .build();
+
+        MissionUpdateStatusRequestDTO request = new MissionUpdateStatusRequestDTO();
+        request.setId(mission.getId());
+        request.setStatus(MissionStatus.IN_PROGRESS);
+
+        when(missionRepository.save(any(Mission.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
+
+        Mission updated = missionService.patchStatus(request);
+
+        assertEquals(MissionStatus.IN_PROGRESS, updated.getStatus());
+        verify(missionRepository).save(mission);
+    }
+
+    @Test
+    void patchStatus_shouldThrowException_whenTransitionInvalid() {
+        Mission mission = Mission.builder()
+                .id(1)
+                .status(MissionStatus.PLANNED)
+                .departureDate(LocalDateTime.now())
+                .build();
+
+        MissionUpdateStatusRequestDTO request = new MissionUpdateStatusRequestDTO();
+        request.setId(mission.getId());
+        request.setStatus(MissionStatus.COMPLETED);
+
+        when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
+
+        assertThrows(MissionTransitionException.class, () -> missionService.patchStatus(request));
+        verify(missionRepository, never()).save(any());
+    }
+
+    @Test
+    void patchStatus_shouldThrowException_whenInProgressBeforeDeparture() {
+        LocalDateTime futureDeparture = LocalDateTime.now().plusHours(2);
+        Mission mission = Mission.builder()
+                .id(1)
+                .status(MissionStatus.PLANNED)
+                .departureDate(futureDeparture)
+                .build();
+
+        MissionUpdateStatusRequestDTO request = new MissionUpdateStatusRequestDTO();
+        request.setId(mission.getId());
+        request.setStatus(MissionStatus.IN_PROGRESS);
+
+        when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
+
+        MissionTransitionException ex = assertThrows(MissionTransitionException.class,
+                () -> missionService.patchStatus(request));
+
+        assertTrue(ex.getMessage().contains("departure date is in the future"));
         verify(missionRepository, never()).save(any());
     }
 }

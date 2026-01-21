@@ -7,6 +7,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tools.jackson.databind.exc.InvalidFormatException;
@@ -34,6 +35,19 @@ public class GlobalExceptionHandler {
         GlobalErrorResponse error = new GlobalErrorResponse(status, message, System.currentTimeMillis());
 
         return new ResponseEntity<>(error, exc.getStatus());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<GlobalErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exc) {
+        String message = exc.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + " " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        GlobalErrorResponse error = new GlobalErrorResponse(HttpStatus.BAD_REQUEST.value(), message, System.currentTimeMillis());
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler

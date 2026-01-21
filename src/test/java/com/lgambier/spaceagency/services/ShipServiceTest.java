@@ -3,7 +3,7 @@ package com.lgambier.spaceagency.services;
 
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.enums.ShipStatus;
-import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociated;
+import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociatedException;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import com.lgambier.spaceagency.repositories.ShipRepository;
@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -38,10 +39,13 @@ public class ShipServiceTest {
 
     MissionService missionService;
 
+    JsonMapper jsonMapper;
+
+
     @BeforeEach
     void setUp() {
         shipService = new ShipService(shipRepository, missionRepository, timeProvider);
-        missionService = new MissionService(missionRepository);
+        missionService = new MissionService(missionRepository, jsonMapper);
     }
 
     @Test
@@ -80,8 +84,10 @@ public class ShipServiceTest {
 
         when(missionRepository.existPlannedOrInProgressMissionForShip(ship.getId(), now)).thenReturn(true);
 
-        assertThrows(ShipCannotDeleteMissionPlannedOrInProgressAssociated.class,
-                     () -> shipService.deleteById(ship.getId()));
+        assertThrows(
+                ShipCannotDeleteMissionPlannedOrInProgressAssociatedException.class,
+                () -> shipService.deleteById(ship.getId())
+        );
 
         verify(shipRepository, never()).delete(any());
     }

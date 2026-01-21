@@ -3,15 +3,15 @@ package com.lgambier.spaceagency.exceptions.ship;
 import com.lgambier.spaceagency.exceptions.config.GlobalException;
 import org.springframework.http.HttpStatus;
 
-public class ShipCannotDeleteMissionPlannedOrInProgressAssociated extends GlobalException {
+public class ShipCannotDeleteMissionPlannedOrInProgressAssociatedException extends GlobalException {
     private static final String DEFAULT_MESSAGE = "Cannot delete this ship because it’s associated with a mission that is currently in progress or planned.";
     private static final HttpStatus HTTP_STATUS = HttpStatus.CONFLICT;
 
-    public ShipCannotDeleteMissionPlannedOrInProgressAssociated(String message) {
+    public ShipCannotDeleteMissionPlannedOrInProgressAssociatedException(String message) {
         super(message);
     }
 
-    public ShipCannotDeleteMissionPlannedOrInProgressAssociated() {
+    public ShipCannotDeleteMissionPlannedOrInProgressAssociatedException() {
         super(DEFAULT_MESSAGE, HTTP_STATUS);
     }
 }

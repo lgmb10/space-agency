@@ -31,13 +31,22 @@ public class MissionServiceTest {
     @Mock
     MissionRepository missionRepository;
 
+    @Mock
+    PassengerService passengerService;
+
+    @Mock
+    ShipService shipService;
+
+    @Mock
+    BookingService bookingService;
+
     MissionService missionService;
 
     JsonMapper jsonMapper;
 
     @BeforeEach
     void setUp() {
-        missionService = new MissionService(missionRepository, jsonMapper);
+        missionService = new MissionService(missionRepository, shipService, passengerService, bookingService, jsonMapper);
     }
 
     @Test
@@ -236,5 +245,10 @@ public class MissionServiceTest {
                            .getMessage()
                            .contains("departure date is in the future"));
         verify(missionRepository, never()).save(any());
+    }
+
+    @Test
+    void addPassenger_shouldThrownException_whenShipWeightExceed(){
+
     }
 }

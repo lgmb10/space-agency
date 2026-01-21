@@ -5,16 +5,18 @@ import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
+import com.lgambier.spaceagency.dto.mission.request.*;
 import com.lgambier.spaceagency.enums.MissionStatus;
-import com.lgambier.spaceagency.exceptions.mission.MissionNotFoundException;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUseException;
-import com.lgambier.spaceagency.exceptions.mission.MissionTransitionException;
+import com.lgambier.spaceagency.exceptions.mission.*;
+import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
+import com.lgambier.spaceagency.models.Booking;
 import com.lgambier.spaceagency.models.Mission;
+import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -27,6 +29,12 @@ import java.util.stream.Collectors;
 public class MissionService {
 
     private final MissionRepository missionRepository;
+
+    private final ShipService shipService;
+
+    private final PassengerService passengerService;
+
+    private final BookingService bookingService;
 
     private final JsonMapper jsonMapper;
 
@@ -113,8 +121,17 @@ public class MissionService {
         missionRepository.deleteById(id);
     }
 
+
+    @Transactional
+    public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO) {
+        int passengerId = passengerDTO.getPassengerId();
+        checkCanAddPassenger(missionId, passengerId);
+
+        return bookingService.addPassenger(missionId, passengerId);
+    }
+
     private void checkCapacity(Integer maxPassengers, Ship ship) {
-        if (maxPassengers > ship.getCapacity()) {
+        if (maxPassengers!= null && maxPassengers > ship.getCapacity()) {
             throw new MissionShipCapacityExceedsException(maxPassengers, ship);
         }
     }
@@ -138,5 +155,24 @@ public class MissionService {
         return patchedMission;
     }
 
+    private void checkCanAddPassenger(Integer missionId, Integer passengerId){
+        Mission mission = findById(missionId);
+        Passenger passenger = passengerService.findById(passengerId);
+        Ship ship = shipService.findById(mission.getShip().getId());
+        int missionWeightWithNewPassenger = missionRepository.totalPassengersWeight(missionId, passenger.getWeight());
+
+
+        if(bookingService.isPassengerAlreadyAffectedToGivenMission(passengerId, missionId)){
+            throw new MissionPassengerAlreadyAffectedToGivenMissionException(missionId);
+        }else if(mission.getStatus() != MissionStatus.PLANNED){
+            throw new MissionStatusInvalidToAddPassengerException();
+        }else if(!passenger.getMedicalClearance()){
+            throw new PassengerMedicalClearanceInvalidException();
+        }else if(missionRepository.canAddPassengerToMissionShipForCapacity(missionId)){
+            throw new MissionShipCapacityExceedsException("ship capacity is full, can't add more passenger", HttpStatus.CONFLICT);
+        }else if(missionWeightWithNewPassenger >= ship.getMaxWeight()){
+            throw new MissionShipWeightExceedsException();
+        }
+    }
 
 }

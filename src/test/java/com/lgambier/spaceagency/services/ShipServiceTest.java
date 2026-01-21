@@ -1,15 +1,12 @@
 package com.lgambier.spaceagency.services;
 
 
-import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
-import com.lgambier.spaceagency.enums.MissionStatus;
+import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.enums.ShipStatus;
 import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociated;
-import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import com.lgambier.spaceagency.repositories.ShipRepository;
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,7 +41,7 @@ public class ShipServiceTest {
     @BeforeEach
     void setUp() {
         shipService = new ShipService(shipRepository, missionRepository, timeProvider);
-        missionService = new MissionService(missionRepository, shipService);
+        missionService = new MissionService(missionRepository);
     }
 
     @Test
@@ -58,7 +54,7 @@ public class ShipServiceTest {
 
         when(shipRepository.save(any(Ship.class))).thenReturn(ship);
 
-        Ship savedShip = shipService.create(ship);
+        Ship savedShip = ShipDTO.toShip(shipService.create(ship));
         System.out.println("savedShip : " + savedShip);
         assertNotNull(savedShip, "The saved ship should not be null");
 
@@ -67,30 +63,25 @@ public class ShipServiceTest {
 
     @Test
     public void deleteShip_shouldThrowException_whenMissionAffectedIsPlannedOrInProgress() {
-        Ship ship = Ship.builder()
-                .id(1)
-                .name("test-ship")
-                .status(ShipStatus.ACTIVE)
-                .maxWeight(700)
-                .capacity(10)
-                .build();
+        Ship ship = Ship
+                            .builder()
+                            .id(1)
+                            .name("test-ship")
+                            .status(ShipStatus.ACTIVE)
+                            .maxWeight(700)
+                            .capacity(10)
+                            .build();
 
         LocalDateTime now = LocalDateTime.parse("2026-01-19T14:33:40");
 
-        when(shipRepository.findById(ship.getId()))
-                .thenReturn(Optional.of(ship));
+        when(shipRepository.findById(ship.getId())).thenReturn(Optional.of(ship));
 
-        when(timeProvider.now())
-                .thenReturn(now);
+        when(timeProvider.now()).thenReturn(now);
 
-        when(missionRepository.existPlannedOrInProgressMissionForShip(
-                ship.getId(), now))
-                .thenReturn(true);
+        when(missionRepository.existPlannedOrInProgressMissionForShip(ship.getId(), now)).thenReturn(true);
 
-        assertThrows(
-                ShipCannotDeleteMissionPlannedOrInProgressAssociated.class,
-                () -> shipService.deleteById(ship.getId())
-        );
+        assertThrows(ShipCannotDeleteMissionPlannedOrInProgressAssociated.class,
+                     () -> shipService.deleteById(ship.getId()));
 
         verify(shipRepository, never()).delete(any());
     }

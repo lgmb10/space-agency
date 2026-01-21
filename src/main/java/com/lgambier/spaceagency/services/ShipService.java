@@ -1,5 +1,6 @@
 package com.lgambier.spaceagency.services;
 
+import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociated;
 import com.lgambier.spaceagency.exceptions.ship.ShipNotFoundException;
 import com.lgambier.spaceagency.models.Ship;
@@ -9,8 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,25 +23,34 @@ public class ShipService {
 
     private final TimeProvider timeProvider;
 
-    public List<Ship> findAll() {
-        return shipRepository.findAll();
+    public List<ShipDTO> findAll() {
+        List<Ship> ships = shipRepository.findAll();
+        return ships.stream()
+                       .map(ShipDTO::toDTO)
+                       .collect(Collectors.toList());
     }
 
-    public Ship findById(Integer id) {
-        return shipRepository.findById(id).orElseThrow(() -> new ShipNotFoundException(id));
+    public ShipDTO findById(Integer id) {
+        Ship ship = shipRepository
+                       .findById(id)
+                       .orElseThrow(() -> new ShipNotFoundException(id));
+
+        return ShipDTO.toDTO(ship);
     }
 
 
     @Transactional
-    public Ship create(Ship ship) {
-        return shipRepository.save(ship);
+    public ShipDTO create(Ship ship) {
+        return ShipDTO.toDTO(shipRepository.save(ship));
     }
 
     @Transactional
-    public Ship update(Ship ship) {
-        shipRepository.findById(ship.getId()).orElseThrow(() -> new ShipNotFoundException(ship.getId()));
+    public ShipDTO update(Ship ship) {
+        shipRepository
+                .findById(ship.getId())
+                .orElseThrow(() -> new ShipNotFoundException(ship.getId()));
 
-        return shipRepository.save(ship);
+        return ShipDTO.toDTO(shipRepository.save(ship));
     }
 
     @Transactional
@@ -51,8 +61,8 @@ public class ShipService {
         shipRepository.deleteById(id);
     }
 
-    private void isShipAssociatedToPlannedOrInProgressMission(Integer shipId, TimeProvider timeProvider){
-        if(missionRepository.existPlannedOrInProgressMissionForShip(shipId, timeProvider.now())){
+    private void isShipAssociatedToPlannedOrInProgressMission(Integer shipId, TimeProvider timeProvider) {
+        if (missionRepository.existPlannedOrInProgressMissionForShip(shipId, timeProvider.now())) {
             throw new ShipCannotDeleteMissionPlannedOrInProgressAssociated();
         }
     }

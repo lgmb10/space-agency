@@ -5,16 +5,18 @@ meta {
 }
 
 put {
-  url: http://localhost:8080/api/ship
+  url: http://localhost:8080/api/ships
   body: json
   auth: none
 }
 
 body:json {
   {
-    "name": "toto",
+    "id": 1,
+    "name": "faucon millenium",
     "capacity": 15,
-    "maxWeight": 700
+    "maxWeight": 600,
+    "status": "ACTIVE"
   }
 }
 

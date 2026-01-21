@@ -1,5 +1,6 @@
 package com.lgambier.spaceagency.services;
 
+import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
 import com.lgambier.spaceagency.exceptions.mission.MissionNotFoundException;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,42 +22,44 @@ public class MissionService {
 
     private final MissionRepository missionRepository;
 
-    private final ShipService shipService;
-
-
-    public List<Mission> findAll() {
-        return missionRepository.findAll();
+    public List<MissionDTO> findAll() {
+        List<Mission> missions = missionRepository.findAll();
+        return missions
+                       .stream()
+                       .map(MissionDTO::toDTO)
+                       .collect(Collectors.toList());
     }
 
-    public Mission findById(int id) {
-        return missionRepository.findById(id).orElseThrow(() -> new MissionNotFoundException(id));
+    public MissionDTO findById(int id) {
+        Mission mission = missionRepository
+                                  .findById(id)
+                                  .orElseThrow(() -> new MissionNotFoundException(id));
+
+        return MissionDTO.toDTO(mission);
     }
 
 
     @Transactional
-    public Mission create(MissionCreateRequestDTO missionRequest) {
-        Ship ship = shipService.findById(missionRequest.getShipId());
+    public MissionDTO create(MissionCreateRequestDTO missionRequest, Ship ship) {
+
         checkCapacity(missionRequest.getMaxPassengers(), ship);
 
-        Mission mission = Mission.builder().ship(ship).departureDate(missionRequest.getDepartureDate()).arrivalDate(missionRequest.getArrivalDate()).origin(missionRequest.getOrigin()).destination(missionRequest.getDestination()).status(missionRequest.getStatus()).maxPassengers(missionRequest.getMaxPassengers()).build();
-        checkDatesOverlap(ship.getId(), mission);
+        Mission mission = MissionCreateRequestDTO.toMission(missionRequest, ship);
+        checkDatesOverlap(ship.getId(), mission, false);
 
-
-        return missionRepository.save(mission);
+        return MissionDTO.toDTO(missionRepository.save(mission));
     }
 
     @Transactional
-    public Mission update(MissionUpdateRequestDTO missionRequest) {
+    public MissionDTO update(MissionUpdateRequestDTO missionRequest, Ship ship) {
         findById(missionRequest.getId());
 
-        Ship ship = shipService.findById(missionRequest.getShipId());
         checkCapacity(missionRequest.getMaxPassengers(), ship);
 
-        Mission mission = Mission.builder().ship(ship).departureDate(missionRequest.getDepartureDate()).arrivalDate(missionRequest.getArrivalDate()).origin(missionRequest.getOrigin()).destination(missionRequest.getDestination()).status(missionRequest.getStatus()).maxPassengers(missionRequest.getMaxPassengers()).build();
-        checkDatesOverlap(ship.getId(), mission);
+        Mission mission = MissionUpdateRequestDTO.toMission(missionRequest, ship);
+        checkDatesOverlap(ship.getId(), mission, true);
 
-
-        return missionRepository.save(mission);
+        return MissionDTO.toDTO(missionRepository.save(mission));
     }
 
     @Transactional
@@ -70,9 +74,10 @@ public class MissionService {
         }
     }
 
-    private void checkDatesOverlap(int shipId, Mission mission){
-        if(missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate())){
-            throw new MissionShipTimeSlotAlreadyInUse();
+    private void checkDatesOverlap(Integer shipId, Mission mission, Boolean onUpdate) {
+        if (missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate())) {
+            if(onUpdate) throw new MissionShipTimeSlotAlreadyInUse().onUpdate();
+            else throw new MissionShipTimeSlotAlreadyInUse();
         }
     }
 

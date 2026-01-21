@@ -1,5 +1,6 @@
 package com.lgambier.spaceagency.controllers;
 
+import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.services.ShipService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,43 +22,26 @@ public class ShipController {
     private final JsonMapper jsonMapper;
 
     @GetMapping("/ships")
-    public List<Ship> getAllShips() {
+    public List<ShipDTO> getAllShips() {
         return shipService.findAll();
     }
 
     @GetMapping("/ships/{shipId}")
-    public Ship getOneShip(@PathVariable Integer  shipId) {
+    public ShipDTO getOneShip(@PathVariable Integer  shipId) {
         return shipService.findById(shipId);
     }
 
     @PostMapping("/ships")
     @ResponseStatus(HttpStatus.CREATED)
-    public Ship createShip(@RequestBody Ship ship) {
+    public ShipDTO createShip(@RequestBody Ship ship) {
         return shipService.create(ship);
     }
 
     @PutMapping("/ships")
-    public Ship updateShip(@RequestBody Ship ship) {
+    public ShipDTO updateShip(@RequestBody Ship ship) {
         return shipService.update(ship);
     }
 
-    @PatchMapping("/ships/{shipId}")
-    public Ship patchEmployee(@PathVariable Integer shipId, @RequestBody Map<String, Object> patchPayload){
-        Ship ship = shipService.findById(shipId);
-
-        if(ship == null){
-            throw new RuntimeException("Employee id not found - "+shipId);
-        }
-
-        if(patchPayload.containsKey("id")){
-            throw new RuntimeException("Employee id not allowed in request body - "+ shipId);
-        }
-
-        Ship patchedShip = jsonMapper.updateValue(ship, patchPayload);
-
-        return shipService.update(patchedShip);
-
-    }
 
     @DeleteMapping("/ships/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -1,20 +1,21 @@
 meta {
   name: Create Ship
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
-  url: http://localhost:8080/api/ship
+  url: http://localhost:8080/api/ships
   body: json
   auth: none
 }
 
 body:json {
   {
-    "name": "toto",
+    "name": "faucon tah",
     "capacity": 15,
-    "maxWeight": 700
+    "maxWeight": 700,
+    "status": "ACTIVE"
   }
 }
 

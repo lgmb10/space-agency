@@ -1,5 +1,6 @@
 package com.lgambier.spaceagency.services;
 
+import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerNotFoundException;
 import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.repositories.PassengerRepository;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,26 +17,34 @@ public class PassengerService {
 
     private final PassengerRepository passengerRepository;
 
-
-    public List<Passenger> findAll() {
-        return passengerRepository.findAll();
+    public List<PassengerDTO> findAll() {
+        List<Passenger> passengers = passengerRepository.findAll();
+        return passengers
+                       .stream()
+                       .map(PassengerDTO::toDTO)
+                       .collect(Collectors.toList());
     }
 
-    public Passenger findById(Integer id) {
-        return passengerRepository.findById(id).orElseThrow(() -> new PassengerNotFoundException(id));
-    }
+    public PassengerDTO findById(Integer id) {
+       Passenger passenger = passengerRepository
+                       .findById(id)
+                       .orElseThrow(() -> new PassengerNotFoundException(id));
 
+       return PassengerDTO.toDTO(passenger);
+    }
 
     @Transactional
-    public Passenger create(Passenger passenger) {
-        return passengerRepository.save(passenger);
+    public PassengerDTO create(Passenger passenger) {
+        return PassengerDTO.toDTO(passengerRepository.save(passenger));
     }
 
     @Transactional
-    public Passenger update(Passenger passenger) {
-        passengerRepository.findById(passenger.getId()).orElseThrow(() -> new PassengerNotFoundException(passenger.getId()));
+    public PassengerDTO update(Passenger passenger) {
+        passengerRepository
+                .findById(passenger.getId())
+                .orElseThrow(() -> new PassengerNotFoundException(passenger.getId()));
 
-        return passengerRepository.save(passenger);
+        return PassengerDTO.toDTO(passengerRepository.save(passenger));
     }
 
     @Transactional

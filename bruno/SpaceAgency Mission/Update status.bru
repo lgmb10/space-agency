@@ -1,0 +1,23 @@
+meta {
+  name: Update status
+  type: http
+  seq: 8
+}
+
+patch {
+  url: http://localhost:8080/api/missions
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 24,
+    "origin": "Mars"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

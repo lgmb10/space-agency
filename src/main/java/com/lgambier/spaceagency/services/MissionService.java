@@ -6,6 +6,8 @@ import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.*;
+import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
+import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.exceptions.mission.*;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
@@ -156,9 +158,9 @@ public class MissionService {
     }
 
     private void checkCanAddPassenger(Integer missionId, Integer passengerId){
-        Mission mission = findById(missionId);
-        Passenger passenger = passengerService.findById(passengerId);
-        Ship ship = shipService.findById(mission.getShip().getId());
+        MissionDTO mission = findById(missionId);
+        PassengerDTO passenger = passengerService.findById(passengerId);
+        ShipDTO ship = shipService.findById(mission.getShip().getId());
         int missionWeightWithNewPassenger = missionRepository.totalPassengersWeight(missionId, passenger.getWeight());
 
 

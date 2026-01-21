@@ -72,16 +72,16 @@ public class MissionService {
     }
 
     @Transactional
-    public Mission patch(MissionPatchRequestDTO missionRequest) {
-        Mission mission = findById(missionRequest.getId());
-        Mission patchedMission = createMissionFromPatchDTO(missionRequest, mission);
+    public MissionDTO patch(MissionPatchRequestDTO missionRequest, Ship ship) {
+        Mission mission = MissionDTO.toMission(findById(missionRequest.getId()));
+        Mission patchedMission = createMissionFromPatchDTO(missionRequest, mission, ship, true);
 
-        return missionRepository.save(patchedMission);
+        return MissionDTO.toDTO(missionRepository.save(patchedMission));
     }
 
     @Transactional
-    public Mission patchStatus(MissionUpdateStatusRequestDTO missionRequest) {
-        Mission mission = findById(missionRequest.getId());
+    public MissionDTO patchStatus(MissionUpdateStatusRequestDTO missionRequest) {
+        Mission mission = MissionDTO.toMission(findById(missionRequest.getId()));
         MissionStatus oldStatus = mission.getStatus();
         MissionStatus newStatus = missionRequest.getStatus();
         boolean hasToThrow = false;
@@ -104,7 +104,7 @@ public class MissionService {
         if(hasToThrow) throw new MissionTransitionException(oldStatus, newStatus);
 
         mission.setStatus(missionRequest.getStatus());
-        return missionRepository.save(mission);
+        return MissionDTO.toDTO(missionRepository.save(mission));
     }
 
     @Transactional
@@ -126,14 +126,13 @@ public class MissionService {
         }
     }
 
-    private Mission createMissionFromPatchDTO(MissionPatchRequestDTO missionRequest, Mission currentMission) {
+    private Mission createMissionFromPatchDTO(MissionPatchRequestDTO missionRequest, Mission currentMission, Ship ship, Boolean onUpdate) {
         Mission patchedMission = jsonMapper.updateValue(currentMission, missionRequest);
 
         if (missionRequest.getShipId() != null) {
-            Ship ship = shipService.findById(missionRequest.getShipId());
             checkCapacity(missionRequest.getMaxPassengers(), ship);
             patchedMission.setShip(ship);
-            checkDatesOverlap(ship.getId(), currentMission);
+            checkDatesOverlap(ship.getId(), currentMission, onUpdate);
         }
 
         return patchedMission;

@@ -10,6 +10,7 @@ import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.services.MissionService;
 import com.lgambier.spaceagency.services.ShipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -49,12 +50,13 @@ public class MissionController {
     }
 
     @PatchMapping
-    public Mission patchMission(@RequestBody MissionPatchRequestDTO mission){
-        return missionService.patch(mission);
+    public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission){
+        Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
+        return missionService.patch(mission, ship);
     }
 
     @PatchMapping("/status")
-    public Mission patchMissionStatus(@Valid @RequestBody MissionUpdateStatusRequestDTO mission){
+    public MissionDTO patchMissionStatus(@Valid @RequestBody MissionUpdateStatusRequestDTO mission){
         return missionService.patchStatus(mission);
     }
 

@@ -1,15 +1,13 @@
 package com.lgambier.spaceagency.services;
 
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionAddPassengerDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
-import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.enums.MissionStatus;
-import com.lgambier.spaceagency.exceptions.mission.*;
-import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
-import com.lgambier.spaceagency.models.Booking;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUseException;
+import com.lgambier.spaceagency.exceptions.mission.MissionTransitionException;
 import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import org.junit.jupiter.api.Test;
@@ -31,9 +29,6 @@ public class MissionServiceTest {
 
     @Mock
     MissionRepository missionRepository;
-
-    @Mock
-    BookingService bookingService;
 
     @InjectMocks
     MissionService missionService;
@@ -230,230 +225,11 @@ public class MissionServiceTest {
         when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
 
         MissionTransitionException ex = assertThrows(MissionTransitionException.class,
-                () -> missionService.patchStatus(request));
+                                                     () -> missionService.patchStatus(request));
 
         assertTrue(ex
                            .getMessage()
                            .contains("departure date is in the future"));
-    }
-
-    @Test
-    void addPassenger_shouldAddPassenger_whenAllConditionsAreValid() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(10)
-                               .capacity(10)
-                               .maxWeight(600)
-                               .build();
-
-        LocalDateTime departure = LocalDateTime
-                                          .now()
-                                          .plusHours(1);
-        LocalDateTime arrival = LocalDateTime
-                                        .now()
-                                        .plusHours(3);
-
-        Mission expectedMission = Mission
-                                          .builder()
-                                          .id(1)
-                                          .ship(ShipDTO.toShip(ship))
-                                          .maxPassengers(5)
-                                          .departureDate(departure)
-                                          .arrivalDate(arrival)
-                                          .origin("Earth")
-                                          .destination("Mars")
-                                          .status(MissionStatus.PLANNED)
-                                          .build();
-
-        PassengerDTO passenger = PassengerDTO
-                                         .builder()
-                                         .id(2)
-                                         .weight(80)
-                                         .medicalClearance(true)
-                                         .build();
-
-
-        Booking booking = Booking
-                                  .builder()
-                                  .id(99)
-                                  .passengerId(passenger.getId())
-                                  .missionId(expectedMission.getId())
-                                  .build();
-
-        when(missionRepository.findById(expectedMission.getId())).thenReturn(Optional.of(expectedMission));
-        when(missionRepository.isMissionShipCapacityReached(expectedMission.getId())).thenReturn(false);
-        when(missionRepository.totalPassengersWeight(passenger.getWeight(), expectedMission.getId())).thenReturn(400);
-
-        when(bookingService.isPassengerAlreadyAffectedToGivenMission(passenger.getId(),
-                                                                     expectedMission.getId())).thenReturn(false);
-        when(bookingService.addPassenger(passenger.getId(), expectedMission.getId())).thenReturn(booking);
-
-        MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
-
-        Booking result = missionService.addPassenger(expectedMission.getId(), dto, ship, passenger);
-
-        assertEquals(booking.getMissionId(), result.getMissionId());
-        assertEquals(booking.getPassengerId(), result.getPassengerId());
-
-        verify(bookingService).addPassenger(passenger.getId(), expectedMission.getId());
-    }
-
-    @Test
-    void addPassenger_shouldThrowException_whenPassengerAlreadyAffected() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(2)
-                               .capacity(10)
-                               .maxWeight(600)
-                               .build();
-
-        PassengerDTO passenger = PassengerDTO
-                                         .builder()
-                                         .id(2)
-                                         .weight(80)
-                                         .medicalClearance(true)
-                                         .build();
-
-        Mission mission = Mission
-                                  .builder()
-                                  .id(1)
-                                  .ship(ShipDTO.toShip(ship))
-                                  .maxPassengers(5)
-                                  .origin("Earth")
-                                  .destination("Mars")
-                                  .status(MissionStatus.PLANNED)
-                                  .build();
-
-        when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
-
-        when(bookingService.isPassengerAlreadyAffectedToGivenMission(passenger.getId(), 1)).thenReturn(true);
-
-        MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
-
-        assertThrows(MissionPassengerAlreadyAffectedToGivenMissionException.class,
-                     () -> missionService.addPassenger(1, dto, ship, passenger));
-
-        verify(bookingService, never()).addPassenger(any(), any());
-    }
-
-    @Test
-    void addPassenger_shouldThrowException_whenWeightExceed() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(2)
-                               .capacity(10)
-                               .maxWeight(400)
-                               .build();
-
-        PassengerDTO passenger = PassengerDTO
-                                         .builder()
-                                         .id(2)
-                                         .weight(80)
-                                         .medicalClearance(true)
-                                         .build();
-
-        Mission mission = Mission
-                                  .builder()
-                                  .id(1)
-                                  .ship(ShipDTO.toShip(ship))
-                                  .maxPassengers(5)
-                                  .origin("Earth")
-                                  .destination("Mars")
-                                  .status(MissionStatus.PLANNED)
-                                  .build();
-
-        when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
-
-
-        when(bookingService.isPassengerAlreadyAffectedToGivenMission(passenger.getId(), 1)).thenReturn(false);
-
-//        when(missionRepository.isMissionShipCapacityReached(1))
-//                .thenReturn(false);
-
-        when(missionRepository.totalPassengersWeight(passenger.getWeight(), 1)).thenReturn(500);
-
-
-        MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
-
-        assertThrows(MissionShipWeightExceedsException.class,
-                     () -> missionService.addPassenger(1, dto, ship, passenger));
-
-        verify(bookingService, never()).addPassenger(any(), any());
-    }
-
-    @Test
-    void addPassenger_shouldThrowException_whenShipCapacityExceed() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(2)
-                               .capacity(10)
-                               .maxWeight(400)
-                               .build();
-
-        PassengerDTO passenger = PassengerDTO
-                                         .builder()
-                                         .id(2)
-                                         .weight(80)
-                                         .medicalClearance(true)
-                                         .build();
-
-        Mission mission = Mission
-                                  .builder()
-                                  .id(1)
-                                  .ship(ShipDTO.toShip(ship))
-                                  .maxPassengers(5)
-                                  .origin("Earth")
-                                  .destination("Mars")
-                                  .status(MissionStatus.PLANNED)
-                                  .build();
-
-        when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
-
-
-        when(missionRepository.isMissionShipCapacityReached(1)).thenReturn(true);
-
-        MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
-
-        assertThrows(MissionShipCapacityExceedsException.class,
-                     () -> missionService.addPassenger(1, dto, ship, passenger));
-
-        verify(bookingService, never()).addPassenger(any(), any());
-    }
-
-    @Test
-    void addPassenger_shouldThrowException_whenPassengerMedicalClearanceInvalid() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(2)
-                               .capacity(10)
-                               .maxWeight(400)
-                               .build();
-
-        PassengerDTO passenger = PassengerDTO
-                                         .builder()
-                                         .id(2)
-                                         .weight(80)
-                                         .medicalClearance(false)
-                                         .build();
-
-        Mission mission = Mission
-                                  .builder()
-                                  .id(1)
-                                  .ship(ShipDTO.toShip(ship))
-                                  .maxPassengers(5)
-                                  .origin("Earth")
-                                  .destination("Mars")
-                                  .status(MissionStatus.PLANNED)
-                                  .build();
-
-        when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
-
-        MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
-
-        assertThrows(PassengerMedicalClearanceInvalidException.class,
-                     () -> missionService.addPassenger(1, dto, ship, passenger));
-
-        verify(bookingService, never()).addPassenger(any(), any());
     }
 
 

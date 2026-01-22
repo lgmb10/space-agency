@@ -6,6 +6,8 @@ import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.models.Booking;
 import com.lgambier.spaceagency.models.Ship;
+import com.lgambier.spaceagency.dto.mission.request.*;
+import com.lgambier.spaceagency.models.Booking;
 import com.lgambier.spaceagency.services.MissionService;
 import com.lgambier.spaceagency.services.PassengerService;
 import com.lgambier.spaceagency.services.ShipService;
@@ -43,6 +45,11 @@ public class MissionController {
     public MissionDTO createMission(@RequestBody MissionCreateRequestDTO mission) {
         Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
         return missionService.create(mission, ship);
+    }
+
+    @PostMapping("/{missionId}/passengers")
+    public Booking addPassengerToMission(@PathVariable("missionId") Integer missionId, @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
+        return missionService.addPassenger(missionId, passengerDTO);
     }
 
     @PutMapping

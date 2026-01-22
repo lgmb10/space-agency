@@ -12,6 +12,12 @@ import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.exceptions.mission.*;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
 import com.lgambier.spaceagency.models.Booking;
+import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
+import com.lgambier.spaceagency.enums.MissionStatus;
+import com.lgambier.spaceagency.exceptions.mission.MissionNotFoundException;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUseException;
+import com.lgambier.spaceagency.exceptions.mission.MissionTransitionException;
 import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
@@ -42,7 +48,6 @@ public class MissionService {
                        .map(MissionDTO::toDTO)
                        .collect(Collectors.toList());
     }
-
 
     public MissionDTO findById(int id) {
         Mission mission = missionRepository

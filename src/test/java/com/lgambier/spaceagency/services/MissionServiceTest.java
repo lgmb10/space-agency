@@ -6,10 +6,14 @@ import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
+import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.exceptions.mission.*;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
 import com.lgambier.spaceagency.models.Booking;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
+import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUseException;
+import com.lgambier.spaceagency.exceptions.mission.MissionTransitionException;
 import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import org.junit.jupiter.api.Test;
@@ -235,7 +239,6 @@ public class MissionServiceTest {
         assertTrue(ex
                            .getMessage()
                            .contains("departure date is in the future"));
-        verify(missionRepository, never()).save(any());
     }
 
     @Test

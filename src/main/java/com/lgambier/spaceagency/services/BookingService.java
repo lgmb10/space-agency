@@ -13,13 +13,13 @@ public class BookingService {
     private final BookingRepository bookingRepository;
 
     @Transactional
-    public Booking addPassenger(Integer missionId, Integer passengerId){
+    public Booking addPassenger(Integer passengerId, Integer missionId){
         Booking booking = Booking.builder().passengerId(passengerId).missionId(missionId).build();
 
         return bookingRepository.save(booking);
     }
 
-    public boolean isPassengerAlreadyAffectedToGivenMission(Integer missionId, Integer passengerId){
-        return bookingRepository.findByPassengerIdAndMissionId(missionId, passengerId).isPresent();
+    public boolean isPassengerAlreadyAffectedToGivenMission(Integer passengerId, Integer missionId){
+        return bookingRepository.findByPassengerIdAndMissionId(passengerId, missionId).isPresent();
     }
 }

@@ -1,10 +1,6 @@
 package com.lgambier.spaceagency.services;
 
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.*;
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
@@ -12,12 +8,6 @@ import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.exceptions.mission.*;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
 import com.lgambier.spaceagency.models.Booking;
-import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
-import com.lgambier.spaceagency.enums.MissionStatus;
-import com.lgambier.spaceagency.exceptions.mission.MissionNotFoundException;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUseException;
-import com.lgambier.spaceagency.exceptions.mission.MissionTransitionException;
 import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
@@ -104,13 +94,16 @@ public class MissionService {
             }
             case IN_PROGRESS -> {
                 if (oldStatus != MissionStatus.PLANNED) hasToThrow = true;
-                else if(mission.getDepartureDate().isAfter(LocalDateTime.now())){
-                    throw new MissionTransitionException(oldStatus, newStatus, "You cannot set this mission status to PLANNED because the departure date is in the future.");
+                else if (mission
+                                 .getDepartureDate()
+                                 .isAfter(LocalDateTime.now())) {
+                    throw new MissionTransitionException(oldStatus, newStatus,
+                                                         "You cannot set this mission status to PLANNED because the departure date is in the future.");
                 }
             }
         }
 
-        if(hasToThrow) throw new MissionTransitionException(oldStatus, newStatus);
+        if (hasToThrow) throw new MissionTransitionException(oldStatus, newStatus);
 
         mission.setStatus(missionRequest.getStatus());
         return MissionDTO.toDTO(missionRepository.save(mission));
@@ -124,7 +117,8 @@ public class MissionService {
 
 
     @Transactional
-    public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, ShipDTO ship, PassengerDTO passenger) {
+    public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, ShipDTO ship,
+                                PassengerDTO passenger) {
         int passengerId = passengerDTO.getPassengerId();
         checkCanAddPassenger(missionId, passengerId, ship, passenger);
 
@@ -132,19 +126,20 @@ public class MissionService {
     }
 
     private void checkCapacity(Integer maxPassengers, Ship ship) {
-        if (maxPassengers!= null && maxPassengers > ship.getCapacity()) {
+        if (maxPassengers != null && maxPassengers > ship.getCapacity()) {
             throw new MissionShipCapacityExceedsException(maxPassengers, ship);
         }
     }
 
     private void checkDatesOverlap(Integer shipId, Mission mission, Boolean onUpdate) {
         if (missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate())) {
-            if(onUpdate) throw new MissionShipTimeSlotAlreadyInUseException().onUpdate();
+            if (onUpdate) throw new MissionShipTimeSlotAlreadyInUseException().onUpdate();
             else throw new MissionShipTimeSlotAlreadyInUseException();
         }
     }
 
-    private Mission createMissionFromPatchDTO(MissionPatchRequestDTO missionRequest, Mission currentMission, Ship ship, Boolean onUpdate) {
+    private Mission createMissionFromPatchDTO(MissionPatchRequestDTO missionRequest, Mission currentMission, Ship ship,
+                                              Boolean onUpdate) {
         Mission patchedMission = jsonMapper.updateValue(currentMission, missionRequest);
 
         if (missionRequest.getShipId() != null) {
@@ -156,20 +151,21 @@ public class MissionService {
         return patchedMission;
     }
 
-    private void checkCanAddPassenger(Integer missionId, Integer passengerId, ShipDTO ship, PassengerDTO passenger){
+    private void checkCanAddPassenger(Integer missionId, Integer passengerId, ShipDTO ship, PassengerDTO passenger) {
         MissionDTO mission = findById(missionId);
         int missionWeightWithNewPassenger = missionRepository.totalPassengersWeight(passenger.getWeight(), missionId);
 
 
-        if(bookingService.isPassengerAlreadyAffectedToGivenMission(passengerId, missionId)){
+        if (bookingService.isPassengerAlreadyAffectedToGivenMission(passengerId, missionId)) {
             throw new MissionPassengerAlreadyAffectedToGivenMissionException(missionId);
-        }else if(mission.getStatus() != MissionStatus.PLANNED){
+        } else if (mission.getStatus() != MissionStatus.PLANNED) {
             throw new MissionStatusInvalidToAddPassengerException();
-        }else if(!passenger.getMedicalClearance()){
+        } else if (!passenger.getMedicalClearance()) {
             throw new PassengerMedicalClearanceInvalidException();
-        }else if(missionRepository.isMissionShipCapacityReached(missionId)){
-            throw new MissionShipCapacityExceedsException("Ship capacity is full, can't add more passenger", HttpStatus.CONFLICT);
-        }else if(missionWeightWithNewPassenger >= ship.getMaxWeight()){
+        } else if (missionRepository.isMissionShipCapacityReached(missionId)) {
+            throw new MissionShipCapacityExceedsException("Ship capacity is full, can't add more passenger",
+                                                          HttpStatus.CONFLICT);
+        } else if (missionWeightWithNewPassenger >= ship.getMaxWeight()) {
             throw new MissionShipWeightExceedsException();
         }
     }

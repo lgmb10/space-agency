@@ -1,17 +1,11 @@
 package com.lgambier.spaceagency.controllers;
 
-import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
+import com.lgambier.spaceagency.dto.mission.request.*;
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
-import com.lgambier.spaceagency.models.Mission;
-import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
-import com.lgambier.spaceagency.models.Ship;
-import com.lgambier.spaceagency.dto.mission.request.*;
 import com.lgambier.spaceagency.models.Booking;
+import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.services.MissionService;
 import com.lgambier.spaceagency.services.PassengerService;
 import com.lgambier.spaceagency.services.ShipService;
@@ -40,7 +34,7 @@ public class MissionController {
     }
 
     @GetMapping("/{missionId}")
-    public MissionDTO getOneMission(@PathVariable int  missionId) {
+    public MissionDTO getOneMission(@PathVariable int missionId) {
         return missionService.findById(missionId);
     }
 
@@ -58,8 +52,12 @@ public class MissionController {
     }
 
     @PostMapping("/{missionId}/passengers")
-    public Booking addPassengerToMission(@PathVariable("missionId") Integer missionId, @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
-        ShipDTO shipDTO = shipService.findById(missionService.findById(missionId).getShip().getId());
+    public Booking addPassengerToMission(@PathVariable("missionId") Integer missionId,
+                                         @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
+        ShipDTO shipDTO = shipService.findById(missionService
+                                                       .findById(missionId)
+                                                       .getShip()
+                                                       .getId());
         PassengerDTO passenger = passengerService.findById(passengerDTO.getPassengerId());
 
         return missionService.addPassenger(missionId, passengerDTO, shipDTO, passenger);
@@ -67,19 +65,19 @@ public class MissionController {
 
     @DeleteMapping("/{missionId}")
     @PatchMapping
-    public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission){
+    public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission) {
         Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
         return missionService.patch(mission, ship);
     }
 
     @PatchMapping("/status")
-    public MissionDTO patchMissionStatus(@Valid @RequestBody MissionUpdateStatusRequestDTO mission){
+    public MissionDTO patchMissionStatus(@Valid @RequestBody MissionUpdateStatusRequestDTO mission) {
         return missionService.patchStatus(mission);
     }
 
     @DeleteMapping("/{missionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMission(@PathVariable("missionId") Integer missionId){
+    public void deleteMission(@PathVariable("missionId") Integer missionId) {
         missionService.deleteById(missionId);
     }
 

@@ -4,12 +4,14 @@ import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
+import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.dto.mission.request.*;
 import com.lgambier.spaceagency.models.Booking;
 import com.lgambier.spaceagency.services.MissionService;
+import com.lgambier.spaceagency.services.PassengerService;
 import com.lgambier.spaceagency.services.ShipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,8 @@ public class MissionController {
     private final MissionService missionService;
 
     private final ShipService shipService;
+
+    private final PassengerService passengerService;
 
     @GetMapping
     public List<MissionDTO> getAllMissions() {
@@ -46,7 +50,10 @@ public class MissionController {
 
     @PostMapping("/{missionId}/passengers")
     public Booking addPassengerToMission(@PathVariable("missionId") Integer missionId, @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
-        return missionService.addPassenger(missionId, passengerDTO);
+        ShipDTO shipDTO = shipService.findById(missionService.findById(missionId).getShip().getId());
+        PassengerDTO passenger = passengerService.findById(passengerDTO.getPassengerId());
+
+        return missionService.addPassenger(missionId, passengerDTO, shipDTO, passenger);
     }
 
     @PutMapping

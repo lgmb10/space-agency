@@ -7,12 +7,11 @@ import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOr
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import com.lgambier.spaceagency.repositories.ShipRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -35,22 +34,8 @@ public class ShipServiceTest {
     @Mock
     TimeProvider timeProvider;
 
+    @InjectMocks
     ShipService shipService;
-
-    PassengerService passengerService;
-
-    BookingService bookingService;
-
-    MissionService missionService;
-
-    JsonMapper jsonMapper;
-
-
-    @BeforeEach
-    void setUp() {
-        shipService = new ShipService(shipRepository, missionRepository, timeProvider);
-        missionService = new MissionService(missionRepository, shipService, passengerService, bookingService, jsonMapper);
-    }
 
     @Test
     public void createShip() {
@@ -88,10 +73,8 @@ public class ShipServiceTest {
 
         when(missionRepository.existPlannedOrInProgressMissionForShip(ship.getId(), now)).thenReturn(true);
 
-        assertThrows(
-                ShipCannotDeleteMissionPlannedOrInProgressAssociatedException.class,
-                () -> shipService.deleteById(ship.getId())
-        );
+        assertThrows(ShipCannotDeleteMissionPlannedOrInProgressAssociatedException.class,
+                     () -> shipService.deleteById(ship.getId()));
 
         verify(shipRepository, never()).delete(any());
     }

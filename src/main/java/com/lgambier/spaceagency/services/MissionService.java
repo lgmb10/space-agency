@@ -1,5 +1,6 @@
 package com.lgambier.spaceagency.services;
 
+import com.lgambier.spaceagency.dto.mappers.MissionMapper;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
@@ -34,7 +35,7 @@ public class MissionService {
         List<Mission> missions = missionRepository.findAll();
         return missions
                        .stream()
-                       .map(MissionDTO::toDTO)
+                       .map(MissionMapper.INSTANCE::missionToMissionDto)
                        .collect(Collectors.toList());
     }
 
@@ -43,7 +44,7 @@ public class MissionService {
                                   .findById(id)
                                   .orElseThrow(() -> new MissionNotFoundException(id));
 
-        return MissionDTO.toDTO(mission);
+        return MissionMapper.INSTANCE.missionToMissionDto(mission);
     }
 
     @Transactional
@@ -54,7 +55,7 @@ public class MissionService {
         Mission mission = MissionCreateRequestDTO.toMission(missionRequest, ship);
         checkDatesOverlap(ship.getId(), mission, false);
 
-        return MissionDTO.toDTO(missionRepository.save(mission));
+        return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(mission));
     }
 
     @Transactional
@@ -66,20 +67,20 @@ public class MissionService {
         Mission mission = MissionUpdateRequestDTO.toMission(missionRequest, ship);
         checkDatesOverlap(ship.getId(), mission, true);
 
-        return MissionDTO.toDTO(missionRepository.save(mission));
+        return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(mission));
     }
 
     @Transactional
     public MissionDTO patch(MissionPatchRequestDTO missionRequest, Ship ship) {
-        Mission mission = MissionDTO.toMission(findById(missionRequest.getId()));
+        Mission mission = MissionMapper.INSTANCE.missionDtoToMission(findById(missionRequest.getId()));
         Mission patchedMission = createMissionFromPatchDTO(missionRequest, mission, ship, true);
 
-        return MissionDTO.toDTO(missionRepository.save(patchedMission));
+        return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(patchedMission));
     }
 
     @Transactional
     public MissionDTO patchStatus(MissionUpdateStatusRequestDTO missionRequest) {
-        Mission mission = MissionDTO.toMission(findById(missionRequest.getId()));
+        Mission mission = MissionMapper.INSTANCE.missionDtoToMission(findById(missionRequest.getId()));
         MissionStatus oldStatus = mission.getStatus();
         MissionStatus newStatus = missionRequest.getStatus();
         boolean hasToThrow = false;
@@ -105,7 +106,7 @@ public class MissionService {
         if (hasToThrow) throw new MissionTransitionException(oldStatus, newStatus);
 
         mission.setStatus(missionRequest.getStatus());
-        return MissionDTO.toDTO(missionRepository.save(mission));
+        return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(mission));
     }
 
     @Transactional

@@ -1,5 +1,7 @@
 package com.lgambier.spaceagency.services;
 
+import com.lgambier.spaceagency.dto.mappers.PassengerMapper;
+import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerNotFoundException;
 import com.lgambier.spaceagency.models.Passenger;
@@ -21,7 +23,7 @@ public class PassengerService {
         List<Passenger> passengers = passengerRepository.findAll();
         return passengers
                        .stream()
-                       .map(PassengerDTO::toDTO)
+                       .map(PassengerMapper.INSTANCE::passengerToPassengerDto)
                        .collect(Collectors.toList());
     }
 
@@ -30,12 +32,12 @@ public class PassengerService {
                        .findById(id)
                        .orElseThrow(() -> new PassengerNotFoundException(id));
 
-       return PassengerDTO.toDTO(passenger);
+       return PassengerMapper.INSTANCE.passengerToPassengerDto(passenger);
     }
 
     @Transactional
     public PassengerDTO create(Passenger passenger) {
-        return PassengerDTO.toDTO(passengerRepository.save(passenger));
+        return PassengerMapper.INSTANCE.passengerToPassengerDto(passengerRepository.save(passenger));
     }
 
     @Transactional
@@ -44,7 +46,7 @@ public class PassengerService {
                 .findById(passenger.getId())
                 .orElseThrow(() -> new PassengerNotFoundException(passenger.getId()));
 
-        return PassengerDTO.toDTO(passengerRepository.save(passenger));
+        return PassengerMapper.INSTANCE.passengerToPassengerDto(passengerRepository.save(passenger));
     }
 
     @Transactional

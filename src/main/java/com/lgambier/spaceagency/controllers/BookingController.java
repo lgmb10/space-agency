@@ -2,9 +2,12 @@ package com.lgambier.spaceagency.controllers;
 
 
 import com.lgambier.spaceagency.dto.booking.BookingDTO;
+import com.lgambier.spaceagency.dto.mappers.BookingMapper;
+import com.lgambier.spaceagency.dto.mappers.PassengerMapper;
+import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.mission.request.MissionAddPassengerDTO;
-import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
-import com.lgambier.spaceagency.dto.ship.ShipDTO;
+import com.lgambier.spaceagency.models.Passenger;
+import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.services.BookingService;
 import com.lgambier.spaceagency.services.MissionService;
 import com.lgambier.spaceagency.services.PassengerService;
@@ -29,12 +32,14 @@ public class BookingController {
     @PostMapping("/{missionId}")
     public BookingDTO addPassengerToMission(@PathVariable("missionId") Integer missionId,
                                             @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
-        ShipDTO shipDTO = shipService.findById(missionService
-                                                       .findById(missionId)
-                                                       .getShip()
-                                                       .getId());
-        PassengerDTO passenger = passengerService.findById(passengerDTO.getPassengerId());
+        Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(missionService
+                                                                                   .findById(missionId)
+                                                                                   .getShip()
+                                                                                   .getId()));
+        Passenger passenger = PassengerMapper.INSTANCE.passengerDtoToPassenger(
+                passengerService.findById(passengerDTO.getPassengerId()));
 
-        return BookingDTO.toDTO(bookingService.addPassenger(missionId, passengerDTO, shipDTO, passenger));
+        return BookingMapper.INSTANCE.bookingToBookingDto(
+                bookingService.addPassenger(missionId, passengerDTO, ship, passenger));
     }
 }

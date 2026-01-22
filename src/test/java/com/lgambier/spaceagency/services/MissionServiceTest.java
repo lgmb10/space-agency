@@ -230,7 +230,7 @@ public class MissionServiceTest {
         when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
 
         MissionTransitionException ex = assertThrows(MissionTransitionException.class,
-                                                     () -> missionService.patchStatus(request));
+                () -> missionService.patchStatus(request));
 
         assertTrue(ex
                            .getMessage()

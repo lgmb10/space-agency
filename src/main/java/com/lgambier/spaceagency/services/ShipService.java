@@ -1,5 +1,6 @@
 package com.lgambier.spaceagency.services;
 
+import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociatedException;
 import com.lgambier.spaceagency.exceptions.ship.ShipNotFoundException;
@@ -26,7 +27,8 @@ public class ShipService {
     public List<ShipDTO> findAll() {
         List<Ship> ships = shipRepository.findAll();
         return ships.stream()
-                       .map(ShipDTO::toDTO)
+                       .map(ShipMapper.INSTANCE::
+                                    shipToShipDto)
                        .collect(Collectors.toList());
     }
 
@@ -35,13 +37,15 @@ public class ShipService {
                        .findById(id)
                        .orElseThrow(() -> new ShipNotFoundException(id));
 
-        return ShipDTO.toDTO(ship);
+        return ShipMapper.INSTANCE
+                       .shipToShipDto(ship);
     }
 
 
     @Transactional
     public ShipDTO create(Ship ship) {
-        return ShipDTO.toDTO(shipRepository.save(ship));
+        return ShipMapper.INSTANCE
+                       .shipToShipDto(shipRepository.save(ship));
     }
 
     @Transactional
@@ -50,14 +54,14 @@ public class ShipService {
                 .findById(ship.getId())
                 .orElseThrow(() -> new ShipNotFoundException(ship.getId()));
 
-        return ShipDTO.toDTO(shipRepository.save(ship));
+        return ShipMapper.INSTANCE
+                       .shipToShipDto(shipRepository.save(ship));
     }
 
     @Transactional
     public void deleteById(Integer id) {
-        this.findById(id);
-        this.isShipAssociatedToPlannedOrInProgressMission(id, timeProvider);
-
+        findById(id);
+        isShipAssociatedToPlannedOrInProgressMission(id, timeProvider);
         shipRepository.deleteById(id);
     }
 

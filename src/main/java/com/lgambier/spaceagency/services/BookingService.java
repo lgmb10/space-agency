@@ -11,6 +11,8 @@ import com.lgambier.spaceagency.exceptions.mission.MissionShipWeightExceedsExcep
 import com.lgambier.spaceagency.exceptions.mission.MissionStatusInvalidToAddPassengerException;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
 import com.lgambier.spaceagency.models.Booking;
+import com.lgambier.spaceagency.models.Passenger;
+import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.BookingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +28,11 @@ public class BookingService {
     private final MissionService missionService;
 
     @Transactional
-    public Booking addPassenger(Integer passengerId, Integer missionId){
+    public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, Ship ship,
+                                Passenger passenger) {
+        int passengerId = passengerDTO.getPassengerId();
+        checkCanAddPassenger(missionId, passengerId, ship, passenger);
+
         Booking booking = Booking.builder().passengerId(passengerId).missionId(missionId).build();
 
         return bookingRepository.save(booking);
@@ -36,16 +42,7 @@ public class BookingService {
         return bookingRepository.findByPassengerIdAndMissionId(passengerId, missionId).isPresent();
     }
 
-    @Transactional
-    public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, ShipDTO ship,
-                                PassengerDTO passenger) {
-        int passengerId = passengerDTO.getPassengerId();
-        checkCanAddPassenger(missionId, passengerId, ship, passenger);
-
-        return addPassenger(passengerId, missionId);
-    }
-
-    private void checkCanAddPassenger(Integer missionId, Integer passengerId, ShipDTO ship, PassengerDTO passenger) {
+    private void checkCanAddPassenger(Integer missionId, Integer passengerId, Ship ship, Passenger passenger) {
         MissionDTO mission = missionService.findById(missionId);
         int missionWeightWithNewPassenger = missionService.getTotalPassengersWeight(passenger.getWeight(), missionId);
 

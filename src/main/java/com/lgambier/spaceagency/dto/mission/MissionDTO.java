@@ -31,33 +31,4 @@ public class MissionDTO {
     private MissionStatus status;
 
     private Integer maxPassengers;
-
-    public static MissionDTO toDTO(Mission mission) {
-        return MissionDTO
-                       .builder()
-                       .id(mission.getId())
-                       .ship(mission.getShip())
-                       .departureDate(mission.getDepartureDate())
-                       .arrivalDate(mission.getArrivalDate())
-                       .origin(mission.getOrigin())
-                       .destination(mission.getDestination())
-                       .status(mission.getStatus())
-                       .maxPassengers(mission.getMaxPassengers())
-                       .build();
-    }
-
-    public static Mission toMission(MissionDTO dto) {
-        return Mission
-                       .builder()
-                       .id(dto.getId())
-                       .ship(dto.getShip())
-                       .departureDate(dto.getDepartureDate())
-                       .arrivalDate(dto.getArrivalDate())
-                       .origin(dto.getOrigin())
-                       .destination(dto.getDestination())
-                       .status(dto.getStatus())
-                       .maxPassengers(dto.getMaxPassengers())
-                       .build();
-    }
-
 }

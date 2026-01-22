@@ -11,6 +11,8 @@ import com.lgambier.spaceagency.exceptions.mission.MissionShipWeightExceedsExcep
 import com.lgambier.spaceagency.exceptions.mission.MissionStatusInvalidToAddPassengerException;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
 import com.lgambier.spaceagency.models.Booking;
+import com.lgambier.spaceagency.models.Passenger;
+import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.BookingRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,14 +50,14 @@ public class BookingServiceTest {
                                      .status(MissionStatus.PLANNED)
                                      .build();
 
-        PassengerDTO passenger = PassengerDTO
+        Passenger passenger = Passenger
                                          .builder()
                                          .id(passengerId)
                                          .weight(80)
                                          .medicalClearance(true)
                                          .build();
 
-        ShipDTO ship = ShipDTO
+        Ship ship = Ship
                                .builder()
                                .id(10)
                                .maxWeight(1000)
@@ -93,10 +95,10 @@ public class BookingServiceTest {
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(2);
 
         assertThrows(MissionPassengerAlreadyAffectedToGivenMissionException.class,
-                     () -> bookingService.addPassenger(1, dto, ShipDTO
+                     () -> bookingService.addPassenger(1, dto, Ship
                                                                        .builder()
                                                                        .maxWeight(1000)
-                                                                       .build(), PassengerDTO
+                                                                       .build(), Passenger
                                                                                          .builder()
                                                                                          .medicalClearance(true)
                                                                                          .weight(80)
@@ -117,12 +119,12 @@ public class BookingServiceTest {
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(2);
 
         assertThrows(MissionStatusInvalidToAddPassengerException.class, () -> bookingService.addPassenger(1, dto,
-                                                                                                          ShipDTO
+                                                                                                          Ship
                                                                                                                   .builder()
                                                                                                                   .maxWeight(
                                                                                                                           1000)
                                                                                                                   .build(),
-                                                                                                          PassengerDTO
+                                                                                                          Passenger
                                                                                                                   .builder()
                                                                                                                   .medicalClearance(
                                                                                                                           true)
@@ -139,7 +141,7 @@ public class BookingServiceTest {
                                                             .status(MissionStatus.PLANNED)
                                                             .build());
 
-        PassengerDTO passenger = PassengerDTO
+        Passenger passenger = Passenger
                                          .builder()
                                          .id(2)
                                          .medicalClearance(false)
@@ -147,7 +149,7 @@ public class BookingServiceTest {
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(2);
 
-        assertThrows(PassengerMedicalClearanceInvalidException.class, () -> bookingService.addPassenger(1, dto, ShipDTO
+        assertThrows(PassengerMedicalClearanceInvalidException.class, () -> bookingService.addPassenger(1, dto, Ship
                                                                                                                         .builder()
                                                                                                                         .maxWeight(
                                                                                                                                 1000)
@@ -168,12 +170,12 @@ public class BookingServiceTest {
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(2);
 
-        assertThrows(MissionShipCapacityExceedsException.class, () -> bookingService.addPassenger(1, dto, ShipDTO
+        assertThrows(MissionShipCapacityExceedsException.class, () -> bookingService.addPassenger(1, dto, Ship
                                                                                                                   .builder()
                                                                                                                   .maxWeight(
                                                                                                                           1000)
                                                                                                                   .build(),
-                                                                                                  PassengerDTO
+                                                                                                  Passenger
                                                                                                           .builder()
                                                                                                           .medicalClearance(
                                                                                                                   true)
@@ -192,12 +194,12 @@ public class BookingServiceTest {
 
         when(missionService.getTotalPassengersWeight(200, 1)).thenReturn(1200);
 
-        ShipDTO ship = ShipDTO
+        Ship ship = Ship
                                .builder()
                                .maxWeight(1000)
                                .build();
 
-        PassengerDTO passenger = PassengerDTO
+        Passenger passenger = Passenger
                                          .builder()
                                          .id(2)
                                          .weight(200)

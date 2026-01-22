@@ -1,5 +1,6 @@
 package com.lgambier.spaceagency.controllers;
 
+import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
@@ -38,19 +39,22 @@ public class MissionController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MissionDTO createMission(@RequestBody MissionCreateRequestDTO mission) {
-        Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE
+                            .shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.create(mission, ship);
     }
 
     @PutMapping
     public MissionDTO updateMission(@RequestBody MissionUpdateRequestDTO mission) {
-        Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE
+                            .shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.update(mission, ship);
     }
 
     @PatchMapping
     public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission) {
-        Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE
+                            .shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.patch(mission, ship);
     }
 

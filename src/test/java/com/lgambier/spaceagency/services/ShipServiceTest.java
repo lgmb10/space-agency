@@ -1,6 +1,7 @@
 package com.lgambier.spaceagency.services;
 
 
+import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.enums.ShipStatus;
 import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociatedException;
@@ -47,7 +48,8 @@ public class ShipServiceTest {
 
         when(shipRepository.save(any(Ship.class))).thenReturn(ship);
 
-        Ship savedShip = ShipDTO.toShip(shipService.create(ship));
+        Ship savedShip = ShipMapper.INSTANCE
+                                 .shipDtotoShip(shipService.create(ship));
         System.out.println("savedShip : " + savedShip);
         assertNotNull(savedShip, "The saved ship should not be null");
 

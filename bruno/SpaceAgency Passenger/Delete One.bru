@@ -1,0 +1,16 @@
+meta {
+  name: Delete One
+  type: http
+  seq: 5
+}
+
+delete {
+  url: http://localhost:8080/api/passengers/16
+  body: none
+  auth: none
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/passengers
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "firstName": "toto",
+    "lastName": "tutu",
+    "email": "toto@utu.com",
+    "weight": 70,
+    "medicalClearance": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

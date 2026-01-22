@@ -1,0 +1,26 @@
+meta {
+  name: Update Ship
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/api/ships
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 1,
+    "name": "faucon millenium",
+    "capacity": 15,
+    "maxWeight": 600,
+    "status": "ACTIVE"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

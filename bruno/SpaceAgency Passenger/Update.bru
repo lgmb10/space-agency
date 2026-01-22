@@ -1,0 +1,27 @@
+meta {
+  name: Update
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/api/passengers
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 5,
+    "firstName": "jean",
+    "lastName": "Claude",
+    "email": "jean@claudiussus.com",
+    "weight": 80,
+    "medicalClearance": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -47,11 +47,6 @@ public class MissionController {
         return missionService.create(mission, ship);
     }
 
-    @PostMapping("/{missionId}/passengers")
-    public Booking addPassengerToMission(@PathVariable("missionId") Integer missionId, @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
-        return missionService.addPassenger(missionId, passengerDTO);
-    }
-
     @PutMapping
     public MissionDTO updateMission(@RequestBody MissionUpdateRequestDTO mission) {
         Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
@@ -70,7 +65,6 @@ public class MissionController {
         return missionService.addPassenger(missionId, passengerDTO, shipDTO, passenger);
     }
 
-    @DeleteMapping("/{missionId}")
     @PatchMapping
     public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission) {
         Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));

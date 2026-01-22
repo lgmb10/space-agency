@@ -6,14 +6,10 @@ import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
-import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.exceptions.mission.*;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerMedicalClearanceInvalidException;
 import com.lgambier.spaceagency.models.Booking;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
-import com.lgambier.spaceagency.exceptions.mission.MissionShipTimeSlotAlreadyInUseException;
-import com.lgambier.spaceagency.exceptions.mission.MissionTransitionException;
 import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import org.junit.jupiter.api.Test;
@@ -319,26 +315,23 @@ public class MissionServiceTest {
                                          .build();
 
         Mission mission = Mission
-                                          .builder()
-                                          .id(1)
-                                          .ship(ShipDTO.toShip(ship))
-                                          .maxPassengers(5)
-                                          .origin("Earth")
-                                          .destination("Mars")
-                                          .status(MissionStatus.PLANNED)
-                                          .build();
+                                  .builder()
+                                  .id(1)
+                                  .ship(ShipDTO.toShip(ship))
+                                  .maxPassengers(5)
+                                  .origin("Earth")
+                                  .destination("Mars")
+                                  .status(MissionStatus.PLANNED)
+                                  .build();
 
         when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
 
-        when(bookingService.isPassengerAlreadyAffectedToGivenMission(passenger.getId(), 1))
-                .thenReturn(true);
+        when(bookingService.isPassengerAlreadyAffectedToGivenMission(passenger.getId(), 1)).thenReturn(true);
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
 
-        assertThrows(
-                MissionPassengerAlreadyAffectedToGivenMissionException.class,
-                () -> missionService.addPassenger(1, dto, ship, passenger)
-                    );
+        assertThrows(MissionPassengerAlreadyAffectedToGivenMissionException.class,
+                     () -> missionService.addPassenger(1, dto, ship, passenger));
 
         verify(bookingService, never()).addPassenger(any(), any());
     }
@@ -372,22 +365,18 @@ public class MissionServiceTest {
         when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
 
 
-        when(bookingService.isPassengerAlreadyAffectedToGivenMission(passenger.getId(), 1))
-                .thenReturn(false);
+        when(bookingService.isPassengerAlreadyAffectedToGivenMission(passenger.getId(), 1)).thenReturn(false);
 
 //        when(missionRepository.isMissionShipCapacityReached(1))
 //                .thenReturn(false);
 
-        when(missionRepository.totalPassengersWeight(passenger.getWeight(), 1))
-                .thenReturn(500);
+        when(missionRepository.totalPassengersWeight(passenger.getWeight(), 1)).thenReturn(500);
 
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
 
-        assertThrows(
-                MissionShipWeightExceedsException.class,
-                () -> missionService.addPassenger(1, dto, ship, passenger)
-                    );
+        assertThrows(MissionShipWeightExceedsException.class,
+                     () -> missionService.addPassenger(1, dto, ship, passenger));
 
         verify(bookingService, never()).addPassenger(any(), any());
     }
@@ -421,15 +410,12 @@ public class MissionServiceTest {
         when(missionRepository.findById(mission.getId())).thenReturn(Optional.of(mission));
 
 
-        when(missionRepository.isMissionShipCapacityReached(1))
-                .thenReturn(true);
+        when(missionRepository.isMissionShipCapacityReached(1)).thenReturn(true);
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
 
-        assertThrows(
-                MissionShipCapacityExceedsException.class,
-                () -> missionService.addPassenger(1, dto, ship, passenger)
-                    );
+        assertThrows(MissionShipCapacityExceedsException.class,
+                     () -> missionService.addPassenger(1, dto, ship, passenger));
 
         verify(bookingService, never()).addPassenger(any(), any());
     }
@@ -464,10 +450,8 @@ public class MissionServiceTest {
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passenger.getId());
 
-        assertThrows(
-                PassengerMedicalClearanceInvalidException.class,
-                () -> missionService.addPassenger(1, dto, ship, passenger)
-                    );
+        assertThrows(PassengerMedicalClearanceInvalidException.class,
+                     () -> missionService.addPassenger(1, dto, ship, passenger));
 
         verify(bookingService, never()).addPassenger(any(), any());
     }

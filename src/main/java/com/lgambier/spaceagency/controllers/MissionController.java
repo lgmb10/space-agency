@@ -40,6 +40,11 @@ public class MissionController {
         return missionService.findById(missionId);
     }
 
+    @GetMapping("/available")
+    public List<MissionDTO> getAvailableMissions(){
+        return missionService.findAvailableMissions();
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MissionDTO createMission(@RequestBody MissionCreateRequestDTO mission) {

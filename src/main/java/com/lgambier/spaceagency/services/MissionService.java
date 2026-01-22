@@ -47,6 +47,15 @@ public class MissionService {
         return MissionDTO.toDTO(mission);
     }
 
+    public List<MissionDTO> findAvailableMissions() {
+        List<Mission> missions = missionRepository.findAvailableMissions();
+
+        return missions
+                       .stream()
+                       .map(MissionDTO::toDTO)
+                       .collect(Collectors.toList());
+    }
+
     @Transactional
     public MissionDTO create(MissionCreateRequestDTO missionRequest, Ship ship) {
 
@@ -169,5 +178,4 @@ public class MissionService {
             throw new MissionShipWeightExceedsException();
         }
     }
-
 }

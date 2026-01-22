@@ -7,9 +7,29 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface MissionRepository extends JpaRepository<Mission, Integer> {
+
+    @Query("""
+            SELECT m
+            FROM Mission m
+            LEFT JOIN Booking b ON b.missionId = m.id
+            WHERE m.status = 'PLANNED'
+            GROUP BY m.id
+            HAVING COUNT(b.id) < m.maxPassengers
+            """)
+    List<Mission> findAvailableMissions();
+
+//     SELECT DISTINCT m
+//            FROM Mission m
+//            WHERE m.status = 'PLANNED'
+//            AND m.maxPassengers < (
+//                        SELECT COUNT(b.id)
+//                        FROM Booking b
+//                        WHERE b.missionId = m.id
+//                                  )
 
     @Query("""
                 SELECT COUNT(m) > 0
@@ -19,10 +39,12 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
                 AND m.arrivalDate > :departureDate
                 AND m.status != "CANCELLED"
             """)
-    Boolean existsOverlappingMission(@Param("shipId") Integer shipId, @Param("departureDate") LocalDateTime departureDate, @Param("arrivalDate") LocalDateTime arrivalDate);
+    Boolean existsOverlappingMission(@Param("shipId") Integer shipId,
+                                     @Param("departureDate") LocalDateTime departureDate,
+                                     @Param("arrivalDate") LocalDateTime arrivalDate);
 
     @Query("""
-                SELECT COALESCE(COUNT(m), 0) > 0
+                SELECT COUNT(m) > 0
                 FROM Mission m
                 WHERE m.ship.id = :shipId
                 AND m.status IN ('PLANNED', 'IN_PROGRESS')
@@ -37,13 +59,14 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
                 JOIN Passenger p ON p.id = b.passengerId
                 WHERE m.id = :missionId
             """)
-    Integer totalPassengersWeight(@Param("passengerWeight") Integer passengerWeight, @Param("missionId") Integer missionId);
+    Integer totalPassengersWeight(@Param("passengerWeight") Integer passengerWeight,
+                                  @Param("missionId") Integer missionId);
 
     @Query("""
-            SELECT COALESCE(COUNT(b), 0) >= m.maxPassengers
-            FROM Mission m
-            LEFT JOIN Booking b ON m.id = b.missionId
-            WHERE m.id = :missionId
-    """)
+                    SELECT COALESCE(COUNT(b), 0) >= m.maxPassengers
+                    FROM Mission m
+                    LEFT JOIN Booking b ON m.id = b.missionId
+                    WHERE m.id = :missionId
+            """)
     Boolean isMissionShipCapacityReached(@Param("missionId") Integer missionId);
 }

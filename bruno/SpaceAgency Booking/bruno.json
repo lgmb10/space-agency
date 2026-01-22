@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "SpaceAgency Booking",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

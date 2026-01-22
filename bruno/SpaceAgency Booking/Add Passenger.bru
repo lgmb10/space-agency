@@ -1,0 +1,28 @@
+meta {
+  name: Add Passenger
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:8080/api/missions
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "shipId": 5,
+    "departureDate": "2026-01-19T12:42:00",
+    "arrivalDate": "2026-01-19T20:42:00",
+    "origin": "Mars",
+    "destination": "Neptune",
+    "status": "CANCELLED",
+    "maxPassengers": 1
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

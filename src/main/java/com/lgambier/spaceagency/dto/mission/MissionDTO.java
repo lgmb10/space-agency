@@ -46,4 +46,18 @@ public class MissionDTO {
                        .build();
     }
 
+    public static Mission toMission(MissionDTO dto) {
+        return Mission
+                       .builder()
+                       .id(dto.getId())
+                       .ship(dto.getShip())
+                       .departureDate(dto.getDepartureDate())
+                       .arrivalDate(dto.getArrivalDate())
+                       .origin(dto.getOrigin())
+                       .destination(dto.getDestination())
+                       .status(dto.getStatus())
+                       .maxPassengers(dto.getMaxPassengers())
+                       .build();
+    }
+
 }

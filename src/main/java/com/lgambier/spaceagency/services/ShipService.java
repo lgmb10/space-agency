@@ -1,7 +1,7 @@
 package com.lgambier.spaceagency.services;
 
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
-import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociated;
+import com.lgambier.spaceagency.exceptions.ship.ShipCannotDeleteMissionPlannedOrInProgressAssociatedException;
 import com.lgambier.spaceagency.exceptions.ship.ShipNotFoundException;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
@@ -61,9 +61,9 @@ public class ShipService {
         shipRepository.deleteById(id);
     }
 
-    private void isShipAssociatedToPlannedOrInProgressMission(Integer shipId, TimeProvider timeProvider) {
-        if (missionRepository.existPlannedOrInProgressMissionForShip(shipId, timeProvider.now())) {
-            throw new ShipCannotDeleteMissionPlannedOrInProgressAssociated();
+    private void isShipAssociatedToPlannedOrInProgressMission(Integer shipId, TimeProvider timeProvider){
+        if(missionRepository.existPlannedOrInProgressMissionForShip(shipId, timeProvider.now())){
+            throw new ShipCannotDeleteMissionPlannedOrInProgressAssociatedException();
         }
     }
 

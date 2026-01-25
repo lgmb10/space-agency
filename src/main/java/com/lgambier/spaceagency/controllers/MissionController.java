@@ -1,12 +1,12 @@
 package com.lgambier.spaceagency.controllers;
 
-import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
+import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
+import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
-import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
-import com.lgambier.spaceagency.models.Mission;
+import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.services.MissionService;
 import com.lgambier.spaceagency.services.ShipService;
@@ -32,37 +32,40 @@ public class MissionController {
     }
 
     @GetMapping("/{missionId}")
-    public MissionDTO getOneMission(@PathVariable int  missionId) {
+    public MissionDTO getOneMission(@PathVariable int missionId) {
         return missionService.findById(missionId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MissionDTO createMission(@RequestBody MissionCreateRequestDTO mission) {
-        Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE
+                            .shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.create(mission, ship);
     }
 
     @PutMapping
     public MissionDTO updateMission(@RequestBody MissionUpdateRequestDTO mission) {
-        Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE
+                            .shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.update(mission, ship);
     }
 
     @PatchMapping
-    public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission){
-        Ship ship = ShipDTO.toShip(shipService.findById(mission.getShipId()));
+    public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission) {
+        Ship ship = ShipMapper.INSTANCE
+                            .shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.patch(mission, ship);
     }
 
     @PatchMapping("/status")
-    public MissionDTO patchMissionStatus(@Valid @RequestBody MissionUpdateStatusRequestDTO mission){
+    public MissionDTO patchMissionStatus(@Valid @RequestBody MissionUpdateStatusRequestDTO mission) {
         return missionService.patchStatus(mission);
     }
 
     @DeleteMapping("/{missionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMission(@PathVariable("missionId") Integer missionId){
+    public void deleteMission(@PathVariable("missionId") Integer missionId) {
         missionService.deleteById(missionId);
     }
 

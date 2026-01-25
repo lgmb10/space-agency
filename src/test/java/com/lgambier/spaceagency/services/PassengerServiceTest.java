@@ -3,9 +3,9 @@ package com.lgambier.spaceagency.services;
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.repositories.PassengerRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,12 +20,9 @@ public class PassengerServiceTest {
     @Mock
     PassengerRepository passengerRepository;
 
+    @InjectMocks
     PassengerService passengerService;
 
-    @BeforeEach
-    void setUp() {
-        passengerService = new PassengerService(passengerRepository);
-    }
 
     @Test
     public void createPassenger() {

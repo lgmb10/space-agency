@@ -23,16 +23,4 @@ public class PassengerDTO {
     private Integer weight;
 
     private Boolean medicalClearance;
-
-    public static PassengerDTO toDTO(Passenger passenger) {
-        return PassengerDTO
-                       .builder()
-                       .id(passenger.getId())
-                       .firstName(passenger.getFirstName())
-                       .lastName(passenger.getLastName())
-                       .email(passenger.getEmail())
-                       .weight(passenger.getWeight())
-                       .medicalClearance(passenger.getMedicalClearance())
-                       .build();
-    }
 }

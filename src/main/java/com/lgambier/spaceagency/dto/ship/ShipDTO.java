@@ -22,26 +22,4 @@ public class ShipDTO {
     private Integer maxWeight;
 
     private ShipStatus status;
-
-    public static ShipDTO toDTO(Ship ship) {
-        return ShipDTO
-                       .builder()
-                       .id(ship.getId())
-                       .name(ship.getName())
-                       .capacity(ship.getCapacity())
-                       .maxWeight(ship.getMaxWeight())
-                       .status(ship.getStatus())
-                       .build();
-    }
-
-    public static Ship toShip(ShipDTO dto) {
-        return Ship
-                       .builder()
-                       .id(dto.getId())
-                       .name(dto.getName())
-                       .capacity(dto.getCapacity())
-                       .maxWeight(dto.getMaxWeight())
-                       .status(dto.getStatus())
-                       .build();
-    }
 }

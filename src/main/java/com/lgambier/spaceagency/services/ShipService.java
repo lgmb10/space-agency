@@ -9,6 +9,7 @@ import com.lgambier.spaceagency.repositories.MissionRepository;
 import com.lgambier.spaceagency.repositories.ShipRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class ShipService {
 
     private final TimeProvider timeProvider;
 
+    @Secured("ROLE_PLANNER")
     public List<ShipDTO> findAll() {
         List<Ship> ships = shipRepository.findAll();
         return ships.stream()
@@ -32,22 +34,27 @@ public class ShipService {
                        .collect(Collectors.toList());
     }
 
+
+    @Secured({"ROLE_PLANNER", "ROLE_ASTRONAUT"})
     public ShipDTO findById(Integer id) {
         Ship ship = shipRepository
-                       .findById(id)
-                       .orElseThrow(() -> new ShipNotFoundException(id));
+                            .findById(id)
+                            .orElseThrow(() -> new ShipNotFoundException(id));
 
         return ShipMapper.INSTANCE
                        .shipToShipDto(ship);
     }
 
 
+    @Secured("ROLE_PLANNER")
     @Transactional
     public ShipDTO create(Ship ship) {
         return ShipMapper.INSTANCE
                        .shipToShipDto(shipRepository.save(ship));
     }
 
+
+    @Secured("ROLE_PLANNER")
     @Transactional
     public ShipDTO update(Ship ship) {
         shipRepository
@@ -58,6 +65,7 @@ public class ShipService {
                        .shipToShipDto(shipRepository.save(ship));
     }
 
+    @Secured("ROLE_PLANNER")
     @Transactional
     public void deleteById(Integer id) {
         findById(id);
@@ -65,8 +73,8 @@ public class ShipService {
         shipRepository.deleteById(id);
     }
 
-    private void isShipAssociatedToPlannedOrInProgressMission(Integer shipId, TimeProvider timeProvider){
-        if(missionRepository.existPlannedOrInProgressMissionForShip(shipId, timeProvider.now())){
+    private void isShipAssociatedToPlannedOrInProgressMission(Integer shipId, TimeProvider timeProvider) {
+        if (missionRepository.existPlannedOrInProgressMissionForShip(shipId, timeProvider.now())) {
             throw new ShipCannotDeleteMissionPlannedOrInProgressAssociatedException();
         }
     }

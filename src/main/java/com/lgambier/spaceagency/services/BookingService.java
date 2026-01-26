@@ -17,6 +17,7 @@ import com.lgambier.spaceagency.repositories.BookingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +28,7 @@ public class BookingService {
 
     private final MissionService missionService;
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
     @Transactional
     public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, Ship ship,
                                 Passenger passenger) {
@@ -38,6 +40,7 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
     public boolean isPassengerAlreadyAffectedToGivenMission(Integer passengerId, Integer missionId){
         return bookingRepository.findByPassengerIdAndMissionId(passengerId, missionId).isPresent();
     }

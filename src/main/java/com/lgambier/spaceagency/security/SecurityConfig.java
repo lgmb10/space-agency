@@ -40,6 +40,8 @@ public class SecurityConfig {
                                                        .permitAll()
                                                        .requestMatchers("/api/ships/**")
                                                        .hasRole("ADMIN")
+                                                       .requestMatchers("/api/passengers/**")
+                                                       .hasRole("ADMIN")
                                                        .requestMatchers("/api/missions/**")
                                                        .hasAnyRole("ADMIN", "PLANNER")
                                                        .requestMatchers("/api/**")
@@ -51,5 +53,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-
-//                                                       .hasAllAuthorities("SCOPE_read:ships", "SCOPE_write:ships"))

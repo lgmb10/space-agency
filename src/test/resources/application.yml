@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: spaceagency
+  messages:
+    encoding: UTF-8
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH0_BASE_URL}
+          audiences:
+            - ${AUTH0_AUDIENCE}
+
+flyway:
+  enabled: true
+  baseline-on-migrate: true
+  default-schema: space-agency-directory
+  schemas: space-agency-directory

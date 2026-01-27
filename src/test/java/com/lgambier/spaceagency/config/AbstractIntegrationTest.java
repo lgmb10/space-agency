@@ -11,7 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class TestConfiguration {
+public class AbstractIntegrationTest {
 
     private static final DockerImageName MYSQL_IMAGE = DockerImageName
                                                                .parse("mysql:8.4")
@@ -30,6 +30,12 @@ public class TestConfiguration {
         registry.add("spring.datasource.username", MY_SQL_CONTAINER::getUsername);
         registry.add("spring.datasource.password", MY_SQL_CONTAINER::getPassword);
     }
+
+    static {
+        MY_SQL_CONTAINER.start();
+    }
+
+
 
 //    @Test
 //    void test() {

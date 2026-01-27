@@ -1,23 +1,19 @@
 package com.lgambier.spaceagency.repositories;
 
-import com.lgambier.spaceagency.config.TestConfiguration;
+import com.lgambier.spaceagency.config.AbstractIntegrationTest;
 import com.lgambier.spaceagency.enums.ShipStatus;
 import com.lgambier.spaceagency.models.Ship;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-//@DataJpaTest(properties = {"spring.main.web-application-type=none", "spring.security.enabled=false", "spring.flyway.enabled=true"})
-
-@Import(TestConfiguration.class)
-public class ShipRepositoryTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class ShipRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     private ShipRepository shipRepository;

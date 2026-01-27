@@ -1,5 +1,7 @@
 package com.lgambier.spaceagency.controllers;
 
+import com.lgambier.spaceagency.dto.booking.BookingDTO;
+import com.lgambier.spaceagency.dto.mappers.PassengerMapper;
 import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
@@ -7,8 +9,12 @@ import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
 import com.lgambier.spaceagency.dto.ship.ShipDTO;
+import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.models.Ship;
+import com.lgambier.spaceagency.security.SecurityUtils;
+import com.lgambier.spaceagency.services.BookingService;
 import com.lgambier.spaceagency.services.MissionService;
+import com.lgambier.spaceagency.services.PassengerService;
 import com.lgambier.spaceagency.services.ShipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +32,11 @@ public class MissionController {
 
     private final ShipService shipService;
 
+    private final PassengerService passengerService;
+
+    private final BookingService bookingService;
+
+
     @GetMapping
     public List<MissionDTO> getAllMissions() {
         return missionService.findAll();
@@ -34,6 +45,16 @@ public class MissionController {
     @GetMapping("/{missionId}")
     public MissionDTO getOneMission(@PathVariable int missionId) {
         return missionService.findById(missionId);
+    }
+
+    @GetMapping("/me")
+    public List<MissionDTO> getPassengerBookingsFromUser() {
+        String email = SecurityUtils.getJwtUserEmail();
+
+        Passenger passenger = PassengerMapper.INSTANCE.passengerDtoToPassenger(
+                passengerService.findPassengerWithMatchingUserEmail(email));
+
+        return bookingService.getPassengerMissions(passenger.getId());
     }
 
     @PostMapping

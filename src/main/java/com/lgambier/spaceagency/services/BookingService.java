@@ -64,6 +64,13 @@ public class BookingService {
                        .collect(Collectors.toList());
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT"})
+    public List<MissionDTO> getPassengerMissions(Integer passengerId) {
+        List<Booking> bookings = bookingRepository.findByPassengerId(passengerId);
+
+        return bookings.stream().map(b -> missionService.findById(b.getMissionId())).toList();
+    }
+
     private void checkCanAddPassenger(Integer missionId, Integer passengerId, Ship ship, Passenger passenger) {
         MissionDTO mission = missionService.findById(missionId);
         int missionWeightWithNewPassenger = missionService.getTotalPassengersWeight(passenger.getWeight(), missionId);

@@ -2,8 +2,6 @@ package com.lgambier.spaceagency.services;
 
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionAddPassengerDTO;
-import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
-import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.exceptions.mission.MissionPassengerAlreadyAffectedToGivenMissionException;
 import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
@@ -44,24 +42,20 @@ public class BookingServiceTest {
         Integer missionId = 1;
         Integer passengerId = 2;
 
-        MissionDTO mission = MissionDTO
-                                     .builder()
-                                     .id(missionId)
-                                     .status(MissionStatus.PLANNED)
-                                     .build();
+        MissionDTO mission = new MissionDTO(missionId, null, null, null, null, null, MissionStatus.PLANNED, null);
 
         Passenger passenger = Passenger
-                                         .builder()
-                                         .id(passengerId)
-                                         .weight(80)
-                                         .medicalClearance(true)
-                                         .build();
+                                      .builder()
+                                      .id(passengerId)
+                                      .weight(80)
+                                      .medicalClearance(true)
+                                      .build();
 
         Ship ship = Ship
-                               .builder()
-                               .id(10)
-                               .maxWeight(1000)
-                               .build();
+                            .builder()
+                            .id(10)
+                            .maxWeight(1000)
+                            .build();
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(passengerId);
 
@@ -110,20 +104,16 @@ public class BookingServiceTest {
     @Test
     void addPassenger_shouldThrowException_whenMissionStatusIsNotPlanned() {
 
-        when(missionService.findById(1)).thenReturn(MissionDTO
-                                                            .builder()
-                                                            .id(1)
-                                                            .status(MissionStatus.IN_PROGRESS)
-                                                            .build());
+        when(missionService.findById(1)).thenReturn(
+                new MissionDTO(1, null, null, null, null, null, MissionStatus.IN_PROGRESS, null));
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(2);
 
-        assertThrows(MissionStatusInvalidToAddPassengerException.class, () -> bookingService.addPassenger(1, dto,
-                                                                                                          Ship
-                                                                                                                  .builder()
-                                                                                                                  .maxWeight(
-                                                                                                                          1000)
-                                                                                                                  .build(),
+        assertThrows(MissionStatusInvalidToAddPassengerException.class, () -> bookingService.addPassenger(1, dto, Ship
+                                                                                                                          .builder()
+                                                                                                                          .maxWeight(
+                                                                                                                                  1000)
+                                                                                                                          .build(),
                                                                                                           Passenger
                                                                                                                   .builder()
                                                                                                                   .medicalClearance(
@@ -135,17 +125,14 @@ public class BookingServiceTest {
     @Test
     void addPassenger_shouldThrowException_whenMedicalClearanceIsInvalid() {
 
-        when(missionService.findById(1)).thenReturn(MissionDTO
-                                                            .builder()
-                                                            .id(1)
-                                                            .status(MissionStatus.PLANNED)
-                                                            .build());
+        when(missionService.findById(1)).thenReturn(
+                new MissionDTO(1, null, null, null, null, null, MissionStatus.PLANNED, null));
 
         Passenger passenger = Passenger
-                                         .builder()
-                                         .id(2)
-                                         .medicalClearance(false)
-                                         .build();
+                                      .builder()
+                                      .id(2)
+                                      .medicalClearance(false)
+                                      .build();
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(2);
 
@@ -160,11 +147,8 @@ public class BookingServiceTest {
     @Test
     void addPassenger_shouldThrowException_whenShipCapacityIsReached() {
 
-        when(missionService.findById(1)).thenReturn(MissionDTO
-                                                            .builder()
-                                                            .id(1)
-                                                            .status(MissionStatus.PLANNED)
-                                                            .build());
+        when(missionService.findById(1)).thenReturn(
+                new MissionDTO(1, null, null, null, null, null, MissionStatus.PLANNED, null));
 
         when(missionService.isMissionShipCapacityReached(1)).thenReturn(true);
 
@@ -186,25 +170,23 @@ public class BookingServiceTest {
     @Test
     void addPassenger_shouldThrowException_whenShipWeightIsExceeded() {
 
-        when(missionService.findById(1)).thenReturn(MissionDTO
-                                                            .builder()
-                                                            .id(1)
-                                                            .status(MissionStatus.PLANNED)
-                                                            .build());
+        when(missionService.findById(1)).thenReturn(
+                new MissionDTO(1, null, null, null, null, null, MissionStatus.PLANNED, null));
+
 
         when(missionService.getTotalPassengersWeight(200, 1)).thenReturn(1200);
 
         Ship ship = Ship
-                               .builder()
-                               .maxWeight(1000)
-                               .build();
+                            .builder()
+                            .maxWeight(1000)
+                            .build();
 
         Passenger passenger = Passenger
-                                         .builder()
-                                         .id(2)
-                                         .weight(200)
-                                         .medicalClearance(true)
-                                         .build();
+                                      .builder()
+                                      .id(2)
+                                      .weight(200)
+                                      .medicalClearance(true)
+                                      .build();
 
         MissionAddPassengerDTO dto = new MissionAddPassengerDTO(2);
 

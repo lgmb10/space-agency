@@ -1,19 +1,10 @@
 package com.lgambier.spaceagency.dto.booking;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+public record BookingDTO(
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class BookingDTO {
+        Integer id,
 
-    private Integer id;
+        Integer passengerId,
 
-    private Integer passengerId;
-
-    private Integer missionId;
+        Integer missionId) {
 }

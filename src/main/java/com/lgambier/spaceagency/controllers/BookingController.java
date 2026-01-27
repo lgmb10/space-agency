@@ -37,10 +37,10 @@ public class BookingController {
                                             @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
         Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(missionService
                                                                                    .findById(missionId)
-                                                                                   .getShip()
+                                                                                   .ship()
                                                                                    .getId()));
         Passenger passenger = PassengerMapper.INSTANCE.passengerDtoToPassenger(
-                passengerService.findById(passengerDTO.getPassengerId()));
+                passengerService.findById(passengerDTO.passengerId()));
 
         return BookingMapper.INSTANCE.bookingToBookingDto(
                 bookingService.addPassenger(missionId, passengerDTO, ship, passenger));

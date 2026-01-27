@@ -1,26 +1,16 @@
 package com.lgambier.spaceagency.dto.passenger;
 
-import com.lgambier.spaceagency.models.Passenger;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+public record PassengerDTO(
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class PassengerDTO {
+        Integer id,
 
-    private Integer id;
+        String firstName,
 
-    private String firstName;
+        String lastName,
 
-    private String lastName;
+        String email,
 
-    private String email;
+        Integer weight,
 
-    private Integer weight;
-
-    private Boolean medicalClearance;
+        Boolean medicalClearance) {
 }

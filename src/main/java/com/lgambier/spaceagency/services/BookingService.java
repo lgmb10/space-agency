@@ -35,7 +35,7 @@ public class BookingService {
     @Transactional
     public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, Ship ship,
                                 Passenger passenger) {
-        int passengerId = passengerDTO.getPassengerId();
+        int passengerId = passengerDTO.passengerId();
         checkCanAddPassenger(missionId, passengerId, ship, passenger);
 
         Booking booking = Booking
@@ -71,7 +71,7 @@ public class BookingService {
 
         if (isPassengerAlreadyAffectedToGivenMission(passengerId, missionId)) {
             throw new MissionPassengerAlreadyAffectedToGivenMissionException(missionId);
-        } else if (mission.getStatus() != MissionStatus.PLANNED) {
+        } else if (mission.status() != MissionStatus.PLANNED) {
             throw new MissionStatusInvalidToAddPassengerException();
         } else if (!passenger.getMedicalClearance()) {
             throw new PassengerMedicalClearanceInvalidException();

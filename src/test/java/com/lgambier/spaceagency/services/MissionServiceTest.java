@@ -37,11 +37,8 @@ public class MissionServiceTest {
 
     @Test
     void createMission_shouldSaveMission_whenDataIsValid() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(1)
-                               .capacity(10)
-                               .build();
+        ShipDTO ship = new ShipDTO(1, null, 10, null, null);
+
 
         LocalDateTime departure = LocalDateTime
                                           .now()
@@ -52,7 +49,7 @@ public class MissionServiceTest {
 
         MissionCreateRequestDTO request = MissionCreateRequestDTO
                                                   .builder()
-                                                  .shipId(ship.getId())
+                                                  .shipId(ship.id())
                                                   .maxPassengers(5)
                                                   .departureDate(departure)
                                                   .arrivalDate(arrival)
@@ -73,36 +70,32 @@ public class MissionServiceTest {
                                           .status(request.getStatus())
                                           .build();
 
-        when(missionRepository.existsOverlappingMission(ship.getId(), departure, arrival)).thenReturn(false);
+        when(missionRepository.existsOverlappingMission(ship.id(), departure, arrival)).thenReturn(false);
         when(missionRepository.save(any(Mission.class))).thenReturn(expectedMission);
 
         MissionDTO savedMission = missionService.create(request, ShipMapper.INSTANCE
                                                                          .shipDtotoShip(ship));
 
         assertNotNull(savedMission, "The saved mission should not be null");
-        assertEquals(expectedMission.getShip(), savedMission.getShip());
-        assertEquals(expectedMission.getMaxPassengers(), savedMission.getMaxPassengers());
-        assertEquals(expectedMission.getDepartureDate(), savedMission.getDepartureDate());
-        assertEquals(expectedMission.getArrivalDate(), savedMission.getArrivalDate());
-        assertEquals(expectedMission.getOrigin(), savedMission.getOrigin());
-        assertEquals(expectedMission.getDestination(), savedMission.getDestination());
-        assertEquals(expectedMission.getStatus(), savedMission.getStatus());
+        assertEquals(expectedMission.getShip(), savedMission.ship());
+        assertEquals(expectedMission.getMaxPassengers(), savedMission.maxPassengers());
+        assertEquals(expectedMission.getDepartureDate(), savedMission.departureDate());
+        assertEquals(expectedMission.getArrivalDate(), savedMission.arrivalDate());
+        assertEquals(expectedMission.getOrigin(), savedMission.origin());
+        assertEquals(expectedMission.getDestination(), savedMission.destination());
+        assertEquals(expectedMission.getStatus(), savedMission.status());
 
-        verify(missionRepository).existsOverlappingMission(ship.getId(), departure, arrival);
+        verify(missionRepository).existsOverlappingMission(ship.id(), departure, arrival);
         verify(missionRepository).save(any(Mission.class));
     }
 
     @Test
     void createMission_shouldThrowException_whenMaxPassengersExceedsShipCapacity() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(1)
-                               .capacity(10)
-                               .build();
+        ShipDTO ship = new ShipDTO(1, null, 10, null, null);
 
         MissionCreateRequestDTO request = MissionCreateRequestDTO
                                                   .builder()
-                                                  .shipId(ship.getId())
+                                                  .shipId(ship.id())
                                                   .maxPassengers(15)
                                                   .departureDate(LocalDateTime
                                                                          .now()
@@ -126,11 +119,7 @@ public class MissionServiceTest {
 
     @Test
     void createMission_shouldThrowException_whenDatesOverlapForShip() {
-        ShipDTO ship = ShipDTO
-                               .builder()
-                               .id(1)
-                               .capacity(10)
-                               .build();
+        ShipDTO ship = new ShipDTO(1, null, 10, null, null);
 
         LocalDateTime departure = LocalDateTime
                                           .now()
@@ -141,7 +130,7 @@ public class MissionServiceTest {
 
         MissionCreateRequestDTO request = MissionCreateRequestDTO
                                                   .builder()
-                                                  .shipId(ship.getId())
+                                                  .shipId(ship.id())
                                                   .maxPassengers(5)
                                                   .departureDate(departure)
                                                   .arrivalDate(arrival)
@@ -150,7 +139,7 @@ public class MissionServiceTest {
                                                   .status(MissionStatus.PLANNED)
                                                   .build();
 
-        when(missionRepository.existsOverlappingMission(ship.getId(), departure, arrival)).thenReturn(true);
+        when(missionRepository.existsOverlappingMission(ship.id(), departure, arrival)).thenReturn(true);
 
         assertThrows(MissionShipTimeSlotAlreadyInUseException.class,
                      () -> missionService.create(request, ShipMapper.INSTANCE
@@ -182,7 +171,7 @@ public class MissionServiceTest {
 
         MissionDTO updated = missionService.patchStatus(request);
 
-        assertEquals(MissionStatus.IN_PROGRESS, updated.getStatus());
+        assertEquals(MissionStatus.IN_PROGRESS, updated.status());
 
         ArgumentCaptor<Mission> captor = ArgumentCaptor.forClass(Mission.class);
         verify(missionRepository).save(captor.capture());

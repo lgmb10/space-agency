@@ -1,34 +1,25 @@
 package com.lgambier.spaceagency.dto.mission;
 
 import com.lgambier.spaceagency.enums.MissionStatus;
-import com.lgambier.spaceagency.models.Mission;
 import com.lgambier.spaceagency.models.Ship;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class MissionDTO {
+public record MissionDTO(
 
-    private Integer id;
+        Integer id,
 
-    private Ship ship;
+        Ship ship,
 
-    private LocalDateTime departureDate;
+        LocalDateTime departureDate,
 
-    private LocalDateTime arrivalDate;
+        LocalDateTime arrivalDate,
 
-    private String origin;
+        String origin,
 
-    private String destination;
+        String destination,
 
-    private MissionStatus status;
+        MissionStatus status,
 
-    private Integer maxPassengers;
+        Integer maxPassengers) {
 }

@@ -5,20 +5,18 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/missions
+  url: http://localhost:8080/api/bookings/34
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjRSWFJRZldZTzBONG9UbHR4MFJSRSJ9.eyJzcGFjZS1hZ2VuY3ktcm9sZXMiOlsiQURNSU4iLCJQTEFOTkVSIl0sInNwYWNlLWFnZW5jeS1lbWFpbCI6ImxvdWlzZ2FtYmllcjEwQGdtYWlsLmNvbSIsImlzcyI6Imh0dHBzOi8vZGV2LTJsZXk3YTU3ajZ4YnhybGUudXMuYXV0aDAuY29tLyIsInN1YiI6ImF1dGgwfDY5NzcyYjU5NmFkYjk4OWJhZmJhZWY4NiIsImF1ZCI6WyJodHRwczovL3d3dy5zcGFjZWFnZW5jeS5jb20vIiwiaHR0cHM6Ly9kZXYtMmxleTdhNTdqNnhieHJsZS51cy5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzY5NTI3MTE4LCJleHAiOjE3Njk2MTM1MTgsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJndHkiOiJwYXNzd29yZCIsImF6cCI6ImdmcnpmMExNb05wM1FWZGozd1l4dnloSWdQRDVDcjhGIn0.fdHjGugV4gbraThPllVnJVP610KJnaQTtaNZm4k36VmIneS1iUyTOzLHIdkG2JKmEGGW-SkGwDLvC9rCuunyOHrmx2I9HDBD4LfPl83phvvrkMIplEr1fSmKh4YPpw9gZu-w9C2-YitT4xujJIIGnUK0RrLYkDC2LNfysEZda7eYbuIXPED_hr8HytOLOdsLxpn6p7pqos_ttKyXnZn7hXizH08DpVaQM1n9Y2UaLpnd4VL8Bqsc_k77-VH_jXQtVo5ezcp928O-lSEC8gJ0a_Wk4oml49TVgH0ptt1cbz7bUEb-HAWepNzpS1t8scTLgYZoSmpjB8jLEGSFw7-_jQ
 }
 
 body:json {
   {
-    "shipId": 5,
-    "departureDate": "2026-01-19T12:42:00",
-    "arrivalDate": "2026-01-19T20:42:00",
-    "origin": "Mars",
-    "destination": "Neptune",
-    "status": "CANCELLED",
-    "maxPassengers": 1
+    "passengerId": 6
   }
 }
 

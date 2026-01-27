@@ -33,6 +33,9 @@ public class MissionService {
 
     private final JsonMapper jsonMapper;
 
+    private final TimeProvider timeProvider;
+
+
     public List<MissionDTO> findAll() {
         List<Mission> missions = missionRepository.findAll();
         return missions
@@ -142,7 +145,15 @@ public class MissionService {
     }
 
     private void checkDatesOverlap(Integer shipId, Mission mission, Boolean onUpdate) {
-        if (missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate())) {
+        Boolean isOverlapping;
+
+        if(mission.getId() != null){
+            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate(), mission.getId());
+        }else {
+            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate());
+        }
+
+        if (isOverlapping) {
             if (onUpdate) throw new MissionShipTimeSlotAlreadyInUseException().onUpdate();
             else throw new MissionShipTimeSlotAlreadyInUseException();
         }
@@ -159,5 +170,15 @@ public class MissionService {
         }
 
         return patchedMission;
+    }
+
+    public List<SanitizedMissionDTO> getAvailableMissions() {
+        List<Mission> missions = missionRepository.findAvailableMissions(timeProvider.now());
+
+        return missions
+                       .stream()
+                       .map(MissionMapper.INSTANCE::missionToSanitizedMissionDto)
+                       .collect(Collectors.toList());
+
     }
 }

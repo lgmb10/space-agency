@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 public record SanitizedMissionDTO(
 
+        Integer id,
+
         String shipName,
 
         LocalDateTime departureDate,

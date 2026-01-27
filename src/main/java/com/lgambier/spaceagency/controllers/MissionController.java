@@ -53,6 +53,11 @@ public class MissionController {
         return missionService.findPassengerMissions(passenger.getId());
     }
 
+    @GetMapping("/available")
+    public List<SanitizedMissionDTO> getAvailableMissions() {
+        return missionService.getAvailableMissions();
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MissionDTO createMission(@RequestBody MissionCreateRequestDTO mission) {

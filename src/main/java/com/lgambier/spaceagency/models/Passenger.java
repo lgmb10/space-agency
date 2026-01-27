@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Entity
 @Table(name = "passenger", uniqueConstraints = {@UniqueConstraint(name = "uk_passenger_email", columnNames = "email")})
 public class Passenger {

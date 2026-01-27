@@ -1,7 +1,6 @@
 package com.lgambier.spaceagency.services;
 
 import com.lgambier.spaceagency.dto.mappers.PassengerMapper;
-import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
 import com.lgambier.spaceagency.exceptions.passenger.PassengerNotFoundException;
 import com.lgambier.spaceagency.models.Passenger;
@@ -28,11 +27,19 @@ public class PassengerService {
     }
 
     public PassengerDTO findById(Integer id) {
-       Passenger passenger = passengerRepository
-                       .findById(id)
-                       .orElseThrow(() -> new PassengerNotFoundException(id));
+        Passenger passenger = passengerRepository
+                                      .findById(id)
+                                      .orElseThrow(() -> new PassengerNotFoundException(id));
 
-       return PassengerMapper.INSTANCE.passengerToPassengerDto(passenger);
+        return PassengerMapper.INSTANCE.passengerToPassengerDto(passenger);
+    }
+
+    public PassengerDTO findPassengerWithMatchingUserEmail(String email) {
+        Passenger passenger = passengerRepository
+                                      .findByEmail(email)
+                                      .orElseThrow(PassengerNotFoundException::new);
+
+        return PassengerMapper.INSTANCE.passengerToPassengerDto(passenger);
     }
 
     @Transactional

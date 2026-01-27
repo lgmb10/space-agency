@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface MissionRepository extends JpaRepository<Mission, Integer> {
@@ -46,4 +47,7 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
             WHERE m.id = :missionId
     """)
     Boolean isMissionShipCapacityReached(@Param("missionId") Integer missionId);
+
+    @Query("SELECT b.mission FROM Booking b WHERE b.passengerId = :passengerId")
+    List<Mission> findMissionsByPassengerId(@Param("passengerId") Integer passengerId);
 }

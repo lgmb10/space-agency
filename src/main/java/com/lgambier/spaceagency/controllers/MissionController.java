@@ -1,18 +1,16 @@
 package com.lgambier.spaceagency.controllers;
 
-import com.lgambier.spaceagency.dto.booking.BookingDTO;
 import com.lgambier.spaceagency.dto.mappers.PassengerMapper;
 import com.lgambier.spaceagency.dto.mappers.ShipMapper;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
+import com.lgambier.spaceagency.dto.mission.SanitizedMissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateStatusRequestDTO;
-import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.security.SecurityUtils;
-import com.lgambier.spaceagency.services.BookingService;
 import com.lgambier.spaceagency.services.MissionService;
 import com.lgambier.spaceagency.services.PassengerService;
 import com.lgambier.spaceagency.services.ShipService;
@@ -34,8 +32,6 @@ public class MissionController {
 
     private final PassengerService passengerService;
 
-    private final BookingService bookingService;
-
 
     @GetMapping
     public List<MissionDTO> getAllMissions() {
@@ -48,34 +44,31 @@ public class MissionController {
     }
 
     @GetMapping("/me")
-    public List<MissionDTO> getPassengerBookingsFromUser() {
+    public List<SanitizedMissionDTO> getPassengerBookingMissionsFromUser() {
         String email = SecurityUtils.getJwtUserEmail();
 
         Passenger passenger = PassengerMapper.INSTANCE.passengerDtoToPassenger(
                 passengerService.findPassengerWithMatchingUserEmail(email));
 
-        return bookingService.getPassengerMissions(passenger.getId());
+        return missionService.findPassengerMissions(passenger.getId());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MissionDTO createMission(@RequestBody MissionCreateRequestDTO mission) {
-        Ship ship = ShipMapper.INSTANCE
-                            .shipDtotoShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.create(mission, ship);
     }
 
     @PutMapping
     public MissionDTO updateMission(@RequestBody MissionUpdateRequestDTO mission) {
-        Ship ship = ShipMapper.INSTANCE
-                            .shipDtotoShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.update(mission, ship);
     }
 
     @PatchMapping
     public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission) {
-        Ship ship = ShipMapper.INSTANCE
-                            .shipDtotoShip(shipService.findById(mission.getShipId()));
+        Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.patch(mission, ship);
     }
 

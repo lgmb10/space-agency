@@ -1,6 +1,7 @@
 package com.lgambier.spaceagency.controllers;
 
 import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
+import com.lgambier.spaceagency.dto.passenger.SanitizedPassengerDTO;
 import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.services.PassengerService;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,13 @@ public class PassengerController {
         return passengerService.findAll();
     }
 
+    @GetMapping("/mission/{missionId}")
+    public List<SanitizedPassengerDTO> getMissionBookingPassengers(@PathVariable Integer missionId) {
+        return passengerService.getMissionPassengers(missionId);
+    }
+
     @GetMapping("/{passengerId}")
-    public PassengerDTO getOnePassenger(@PathVariable Integer  passengerId) {
+    public PassengerDTO getOnePassenger(@PathVariable Integer passengerId) {
         return passengerService.findById(passengerId);
     }
 
@@ -40,7 +46,7 @@ public class PassengerController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePassenger(@PathVariable("id") Integer id){
+    public void deletePassenger(@PathVariable("id") Integer id) {
         passengerService.deleteById(id);
     }
 

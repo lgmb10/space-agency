@@ -4,7 +4,6 @@ package com.lgambier.spaceagency.controllers;
 import com.lgambier.spaceagency.config.AbstractIntegrationTest;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.enums.ShipStatus;
-import com.lgambier.spaceagency.models.Ship;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ public class ShipControllerTest extends AbstractIntegrationTest {
 
     @Test
     @Order(3)
-    void deleteShip_associatedToPlannedMission_shouldReturn409() throws  Exception {
+    void deleteShip_associatedToPlannedMission_shouldReturn409() throws Exception {
         JSONObject mission = new JSONObject();
         // Associated with previously created ship
         mission.put("shipId", 1);
@@ -71,7 +70,7 @@ public class ShipControllerTest extends AbstractIntegrationTest {
         mission.put("origin", "Jupiter");
         mission.put("destination", "Marseile");
         mission.put("status", MissionStatus.PLANNED);
-        mission.put("maxPassengers",2);
+        mission.put("maxPassengers", 2);
 
         mockMvc
                 .perform(post("/api/missions")
@@ -80,7 +79,9 @@ public class ShipControllerTest extends AbstractIntegrationTest {
                                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(delete("/api/ships/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)).andExpect(status().isConflict());
+        mockMvc
+                .perform(delete("/api/ships/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isConflict());
     }
 
     @Test

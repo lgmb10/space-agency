@@ -3,9 +3,7 @@ package com.lgambier.spaceagency.controllers;
 
 import com.lgambier.spaceagency.config.AbstractIntegrationTest;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,7 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PassengerControllerTest extends AbstractIntegrationTest {
 
@@ -41,6 +39,7 @@ public class PassengerControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(1)
     void createPassenger_withValidData_shouldReturn201() throws Exception {
         mockMvc
                 .perform(post("/api/passengers")
@@ -49,6 +48,26 @@ public class PassengerControllerTest extends AbstractIntegrationTest {
                                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isCreated());
     }
+
+    @Test
+    @Order(2)
+    void getCreatedPassenger_shouldReturn200() throws Exception {
+        mockMvc
+                .perform(get("/api/passengers/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(3)
+    void createPassenger_withExitingPassengerWithSameEmail_shouldReturn409() throws Exception {
+        mockMvc
+                .perform(post("/api/passengers")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(validPassengerDataCreation.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isConflict());
+    }
+
 
     @Test
     void createPassenger_withNegativeWeight_shouldReturn400() throws Exception {

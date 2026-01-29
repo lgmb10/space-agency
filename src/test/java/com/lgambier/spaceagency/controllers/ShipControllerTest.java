@@ -6,9 +6,7 @@ import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.enums.ShipStatus;
 import com.lgambier.spaceagency.models.Ship;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,33 +15,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ShipControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    private Ship validTestShip;
-
     private JSONObject validShipDataCreation;
 
     @BeforeEach
     public void setup() throws Exception {
-        validTestShip = new Ship();
-        validTestShip.setCapacity(10);
-        validTestShip.setName("ship");
-        validTestShip.setStatus(ShipStatus.ACTIVE);
-        validTestShip.setMaxWeight(300);
-
         validShipDataCreation = new JSONObject();
-        validShipDataCreation.put("name", validTestShip.getName());
-        validShipDataCreation.put("capacity", validTestShip.getCapacity());
-        validShipDataCreation.put("status", validTestShip.getStatus());
-        validShipDataCreation.put("maxWeight", validTestShip.getMaxWeight());
+        validShipDataCreation.put("name", "ship");
+        validShipDataCreation.put("capacity", 10);
+        validShipDataCreation.put("status", ShipStatus.ACTIVE);
+        validShipDataCreation.put("maxWeight", 300);
     }
 
     @Test
-    void getShip_shouldReturn200() throws Exception {
+    void getAllShips_shouldReturn200() throws Exception {
         mockMvc
                 .perform(get("/api/ships").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isOk());
@@ -51,6 +42,7 @@ public class ShipControllerTest extends AbstractIntegrationTest {
 
 
     @Test
+    @Order(1)
     void createShip_withValidData_shouldReturn201() throws Exception {
         mockMvc
                 .perform(post("/api/ships")
@@ -58,6 +50,37 @@ public class ShipControllerTest extends AbstractIntegrationTest {
                                  .content(validShipDataCreation.toString())
                                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    @Order(2)
+    void getCreatedShip_shouldReturn200() throws Exception {
+        mockMvc
+                .perform(get("/api/ships/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(3)
+    void deleteShip_associatedToPlannedMission_shouldReturn409() throws  Exception {
+        JSONObject mission = new JSONObject();
+        // Associated with previously created ship
+        mission.put("shipId", 1);
+        mission.put("departureDate", "2026-01-19T12:42:00");
+        mission.put("arrivalDate", "2026-01-19T20:42:00");
+        mission.put("origin", "Jupiter");
+        mission.put("destination", "Marseile");
+        mission.put("status", MissionStatus.PLANNED);
+        mission.put("maxPassengers",2);
+
+        mockMvc
+                .perform(post("/api/missions")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(mission.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(delete("/api/ships/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)).andExpect(status().isConflict());
     }
 
     @Test
@@ -85,32 +108,4 @@ public class ShipControllerTest extends AbstractIntegrationTest {
                                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isBadRequest());
     }
-    
-    @Test
-    void deleteShip_associatedToPlannedMission_shouldReturn409() throws  Exception {
-        JSONObject mission = new JSONObject();
-        // Associated with previously created ship
-        mission.put("shipId", 1);
-        mission.put("departureDate", "2026-01-19T12:42:00");
-        mission.put("arrivalDate", "2026-01-19T20:42:00");
-        mission.put("origin", "Jupiter");
-        mission.put("destination", "Marseile");
-        mission.put("status", MissionStatus.PLANNED);
-        mission.put("maxPassengers",2);
-
-        mockMvc
-                .perform(post("/api/missions")
-                                 .contentType(MediaType.APPLICATION_JSON)
-                                 .content(mission.toString())
-                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(delete("/api/ships/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)).andExpect(status().isConflict());
-
-
-
-
-    }
-
-
 }

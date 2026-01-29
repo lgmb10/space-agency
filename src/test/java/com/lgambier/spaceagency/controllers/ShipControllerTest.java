@@ -86,7 +86,7 @@ public class ShipControllerTest extends AbstractIntegrationTest {
 
     @Test
     void createShip_withInvalidData_shouldReturn400() throws Exception {
-        JSONObject invalidShip = validShipDataCreation;
+        JSONObject invalidShip = new JSONObject(validShipDataCreation.toString());
         invalidShip.put("capacity", "string");
 
         mockMvc
@@ -99,7 +99,7 @@ public class ShipControllerTest extends AbstractIntegrationTest {
 
     @Test
     void createShip_withInvalidStatus_shouldReturn400() throws Exception {
-        JSONObject invalidShip = validShipDataCreation;
+        JSONObject invalidShip = new JSONObject(validShipDataCreation.toString());
         invalidShip.put("status", "INVALID_STATUS");
 
         mockMvc

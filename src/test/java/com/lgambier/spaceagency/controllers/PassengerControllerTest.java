@@ -71,7 +71,7 @@ public class PassengerControllerTest extends AbstractIntegrationTest {
 
     @Test
     void createPassenger_withNegativeWeight_shouldReturn400() throws Exception {
-        JSONObject invalidPassenger = validPassengerDataCreation;
+        JSONObject invalidPassenger = new JSONObject(validPassengerDataCreation.toString());
         invalidPassenger.put("weight", -60);
 
         mockMvc
@@ -84,7 +84,7 @@ public class PassengerControllerTest extends AbstractIntegrationTest {
 
     @Test
     void createPassenger_withInvalidEmail_shouldReturn400() throws Exception {
-        JSONObject invalidPassenger = validPassengerDataCreation;
+        JSONObject invalidPassenger = new JSONObject(validPassengerDataCreation.toString());
         invalidPassenger.put("email", "invalidemail.com");
 
         mockMvc

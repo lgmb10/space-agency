@@ -7,7 +7,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${AUTH0_BASE_URL}
+          issuer-uri: https://dev-2ley7a57j6xbxrle.us.auth0.com/
           audiences:
             - ${AUTH0_AUDIENCE}
 

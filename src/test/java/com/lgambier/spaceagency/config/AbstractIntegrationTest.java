@@ -1,7 +1,15 @@
 package com.lgambier.spaceagency.config;
 
 
+import com.lgambier.spaceagency.controllers.AuthController;
+import com.lgambier.spaceagency.dto.auth.AuthRequestDTO;
+import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
@@ -9,9 +17,21 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+@AutoConfigureMockMvc
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AbstractIntegrationTest {
+
+    protected String accessToken;
+
+    @Autowired
+    private AuthController authController;
+
+    @Value("${TEST_AUTH_LOGIN}")
+    private String login;
+
+    @Value("${TEST_AUTH_PASSWORD}")
+    private String password;
 
     private static final DockerImageName MYSQL_IMAGE = DockerImageName
                                                                .parse("mysql:8.4")
@@ -22,7 +42,6 @@ public class AbstractIntegrationTest {
                                                                       .withDatabaseName("spaceagency")
                                                                       .withUsername("mysql")
                                                                       .withPassword("mysql");
-
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
@@ -35,12 +54,11 @@ public class AbstractIntegrationTest {
         MY_SQL_CONTAINER.start();
     }
 
-
-
-//    @Test
-//    void test() {
-//        assertThat(MY_SQL_CONTAINER.isRunning()).isTrue();
-//    }
-
+    @BeforeEach
+    void obtainAccessToken(){
+        accessToken = authController
+                              .login(new AuthRequestDTO(login, password))
+                              .getBody();
+    }
 
 }

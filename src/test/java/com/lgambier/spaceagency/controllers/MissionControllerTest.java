@@ -11,8 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import java.time.LocalDateTime;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -28,8 +29,8 @@ public class MissionControllerTest extends AbstractIntegrationTest {
     public void setup() throws Exception {
         validMissionDataCreation = new JSONObject();
         validMissionDataCreation.put("shipId", 1);
-        validMissionDataCreation.put("departureDate", "2026-01-19T12:42:00");
-        validMissionDataCreation.put("arrivalDate", "2026-01-19T20:42:00");
+        validMissionDataCreation.put("departureDate", LocalDateTime.now().toString());
+        validMissionDataCreation.put("arrivalDate", LocalDateTime.now().plusHours(5).toString());
         validMissionDataCreation.put("origin", "Mars");
         validMissionDataCreation.put("destination", "Neptune");
         validMissionDataCreation.put("status", MissionStatus.PLANNED);
@@ -44,27 +45,14 @@ public class MissionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void createMission_withNotExistingShip_shouldReturn404() throws Exception {
-        JSONObject invalidMission = validMissionDataCreation;
-        invalidMission.put("shipId", 12345);
-
-        mockMvc
-                .perform(post("/api/missions")
-                                 .contentType(MediaType.APPLICATION_JSON)
-                                 .content(validMissionDataCreation.toString())
-                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isNotFound());
-    }
-
-
-    @Test
     @Order(1)
-    void createMission_withValidData_shouldReturn201() throws Exception {
+    void createShipForMission_shouldReturn201() throws Exception{
         JSONObject ship = new JSONObject();
         ship.put("name", "ship");
         ship.put("capacity", 10);
         ship.put("status", ShipStatus.ACTIVE);
         ship.put("maxWeight", 300);
+
 
         mockMvc
                 .perform(post("/api/ships")
@@ -72,7 +60,40 @@ public class MissionControllerTest extends AbstractIntegrationTest {
                                  .content(ship.toString())
                                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isCreated());
-        
+    }
+
+    @Test
+    @Order(2)
+    void createMission_withInvalidStatus_shouldReturn400() throws Exception {
+        JSONObject invalidMission = new JSONObject(validMissionDataCreation.toString());
+        invalidMission.put("status", "INVALID_STATUS");
+
+        mockMvc
+                .perform(post("/api/missions")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(invalidMission.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Order(3)
+    void createMission_withNotExistingShip_shouldReturn404() throws Exception {
+        JSONObject invalidMission = new JSONObject(validMissionDataCreation.toString());
+        invalidMission.put("shipId", 12345);
+
+        mockMvc
+                .perform(post("/api/missions")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(invalidMission.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    @Order(4)
+    void createMission_withValidData_shouldReturn201() throws Exception {
         mockMvc
                 .perform(post("/api/missions")
                                  .contentType(MediaType.APPLICATION_JSON)
@@ -82,7 +103,7 @@ public class MissionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(2)
+    @Order(5)
     void createMission_withAlreadyInUseShip_shouldReturn409() throws Exception {
         mockMvc
                 .perform(post("/api/missions")
@@ -93,7 +114,7 @@ public class MissionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(3)
+    @Order(6)
     void createMission_withRetiredShip_shouldReturn400() throws Exception {
         JSONObject ship = new JSONObject();
         ship.put("name", "ship-2");
@@ -120,7 +141,7 @@ public class MissionControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(7)
     void createMission_withMaxPassengerSuperiorThanShipCapacity_shouldReturn409() throws Exception {
         JSONObject mission = new JSONObject(validMissionDataCreation.toString());
         mission.put("maxCapacity", 20);
@@ -133,51 +154,49 @@ public class MissionControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isConflict());
     }
 
-//
-//    @Test
-//    @Order(2)
-//    void getCreatedMission_shouldReturn200() throws Exception {
-//        mockMvc
-//                .perform(get("/api/passengers/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-//                .andExpect(status().isOk());
-//    }
-//
-//    @Test
-//    @Order(3)
-//    void createMission_withExitingMissionWithSameEmail_shouldReturn409() throws Exception {
-//        mockMvc
-//                .perform(post("/api/passengers")
-//                                 .contentType(MediaType.APPLICATION_JSON)
-//                                 .content(validMissionDataCreation.toString())
-//                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-//                .andExpect(status().isConflict());
-//    }
-//
-//
-//    @Test
-//    void createMission_withNegativeWeight_shouldReturn400() throws Exception {
-//        JSONObject invalidMission = validMissionDataCreation;
-//        invalidMission.put("weight", -60);
-//
-//        mockMvc
-//                .perform(post("/api/passengers")
-//                                 .contentType(MediaType.APPLICATION_JSON)
-//                                 .content(invalidMission.toString())
-//                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-//                .andExpect(status().isBadRequest());
-//    }
-//
-//    @Test
-//    void createMission_withInvalidEmail_shouldReturn400() throws Exception {
-//        JSONObject invalidMission = validMissionDataCreation;
-//        invalidMission.put("email", "invalidemail.com");
-//
-//        mockMvc
-//                .perform(post("/api/passengers")
-//                                 .contentType(MediaType.APPLICATION_JSON)
-//                                 .content(invalidMission.toString())
-//                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-//                .andExpect(status().isBadRequest());
-//    }
+    @Test
+    @Order(8)
+    void updateMissionStatus_fromPlannedToInProgress_shouldReturn200() throws Exception {
+        JSONObject status = new JSONObject();
+        status.put("id", 1);
+        status.put("status", "IN_PROGRESS");
+
+        mockMvc
+                .perform(patch("/api/missions/status")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(status.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(9)
+    void updateMissionStatus_fromInProgressToCompleted_shouldReturn200() throws Exception {
+        JSONObject status = new JSONObject();
+        status.put("id", 1);
+        status.put("status", "COMPLETED");
+
+        mockMvc
+                .perform(patch("/api/missions/status")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(status.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(10)
+    void updateMissionStatus_fromCompletedToPlanned_shouldReturn409() throws Exception {
+        JSONObject status = new JSONObject();
+        status.put("id", 1);
+        status.put("status", "PLANNED");
+
+        mockMvc
+                .perform(patch("/api/missions/status")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(status.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isConflict());
+    }
 
 }

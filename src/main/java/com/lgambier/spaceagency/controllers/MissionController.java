@@ -73,8 +73,14 @@ public class MissionController {
 
     @PatchMapping
     public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission) {
-        Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(mission.getShipId()));
-        return missionService.patch(mission, ship);
+        if(mission.getShipId() != null){
+            Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(mission.getShipId()));
+            return missionService.patch(mission, ship);
+
+        }
+
+        return missionService.patch(mission, null);
+
     }
 
     @PatchMapping("/status")

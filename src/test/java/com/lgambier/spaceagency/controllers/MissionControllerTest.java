@@ -29,8 +29,13 @@ public class MissionControllerTest extends AbstractIntegrationTest {
     public void setup() throws Exception {
         validMissionDataCreation = new JSONObject();
         validMissionDataCreation.put("shipId", 1);
-        validMissionDataCreation.put("departureDate", LocalDateTime.now().toString());
-        validMissionDataCreation.put("arrivalDate", LocalDateTime.now().plusHours(5).toString());
+        validMissionDataCreation.put("departureDate", LocalDateTime
+                                                              .now()
+                                                              .toString());
+        validMissionDataCreation.put("arrivalDate", LocalDateTime
+                                                            .now()
+                                                            .plusHours(5)
+                                                            .toString());
         validMissionDataCreation.put("origin", "Mars");
         validMissionDataCreation.put("destination", "Neptune");
         validMissionDataCreation.put("status", MissionStatus.PLANNED);
@@ -46,7 +51,7 @@ public class MissionControllerTest extends AbstractIntegrationTest {
 
     @Test
     @Order(1)
-    void createShipForMission_shouldReturn201() throws Exception{
+    void createShipForMission_shouldReturn201() throws Exception {
         JSONObject ship = new JSONObject();
         ship.put("name", "ship");
         ship.put("capacity", 10);
@@ -197,6 +202,49 @@ public class MissionControllerTest extends AbstractIntegrationTest {
                                  .content(status.toString())
                                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    @Order(11)
+    void addPassengerToMission_whenEverythingIsOk_shouldReturn200() throws Exception {
+        JSONObject validPassengerDataCreation = new JSONObject();
+        validPassengerDataCreation.put("firstName", "toto");
+        validPassengerDataCreation.put("lastName", "tata");
+        validPassengerDataCreation.put("email", "toto@tata.com");
+        validPassengerDataCreation.put("weight", 75);
+        validPassengerDataCreation.put("medicalClearance", true);
+
+        mockMvc
+                .perform(get("/api/passengers").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+
+
+        JSONObject mission = new JSONObject(validMissionDataCreation.toString());
+        mission.put("departureDate", LocalDateTime
+                                             .now()
+                                             .plusHours(1)
+                                             .toString());
+
+        mockMvc
+                .perform(post("/api/missions")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(mission.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isCreated());
+
+
+        mockMvc
+                .perform(post("/api/missions")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(mission.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isCreated());
+
+
+
+
+
+
     }
 
 }

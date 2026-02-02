@@ -1,7 +1,7 @@
 package com.lgambier.spaceagency.controllers;
 
 
-import com.lgambier.spaceagency.config.AbstractIntegrationTest;
+import com.lgambier.spaceagency.config.AbstractAuthenticatedIntegrationTest;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PassengerControllerTest extends AbstractIntegrationTest {
+public class PassengerControllerTestAuthenticated extends AbstractAuthenticatedIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

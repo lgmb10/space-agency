@@ -1,7 +1,7 @@
 package com.lgambier.spaceagency.controllers;
 
 
-import com.lgambier.spaceagency.config.AbstractIntegrationTest;
+import com.lgambier.spaceagency.config.AbstractAuthenticatedIntegrationTest;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.enums.ShipStatus;
 import org.json.JSONObject;
@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class BookingControllerTest extends AbstractIntegrationTest {
+public class BookingControllerTestAuthenticated extends AbstractAuthenticatedIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -153,7 +153,7 @@ public class BookingControllerTest extends AbstractIntegrationTest {
 
         JSONObject updateMission = new JSONObject();
         updateMission.put("id", 1);
-        updateMission.put("maxPassengers", 3);
+        updateMission.put("maxPassengers", 4);
 
         mockMvc
                 .perform(patch("/api/missions")
@@ -163,6 +163,21 @@ public class BookingControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
 
+        JSONObject passengerBookingData = new JSONObject();
+        passengerBookingData.put("passengerId", 3);
+
+        mockMvc
+                .perform(post("/api/bookings/1")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(passengerBookingData.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isConflict());
+
+    }
+
+    @Test
+    @Order(5)
+    void addPassengerToMission_whenPassengerAlreadyAffectedToSameMission_shouldReturn409() throws Exception {
         JSONObject passengerBookingData = new JSONObject();
         passengerBookingData.put("passengerId", 3);
 

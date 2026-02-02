@@ -1,7 +1,7 @@
 package com.lgambier.spaceagency.controllers;
 
 
-import com.lgambier.spaceagency.config.AbstractIntegrationTest;
+import com.lgambier.spaceagency.config.AbstractAuthenticatedIntegrationTest;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.enums.ShipStatus;
 import org.json.JSONObject;
@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ShipControllerTest extends AbstractIntegrationTest {
+public class ShipControllerTestAuthenticated extends AbstractAuthenticatedIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

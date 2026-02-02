@@ -1,6 +1,6 @@
 package com.lgambier.spaceagency.repositories;
 
-import com.lgambier.spaceagency.config.AbstractIntegrationTest;
+import com.lgambier.spaceagency.config.AbstractAuthenticatedIntegrationTest;
 import com.lgambier.spaceagency.enums.ShipStatus;
 import com.lgambier.spaceagency.models.Ship;
 import org.junit.jupiter.api.AfterEach;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ShipRepositoryTest extends AbstractIntegrationTest {
+public class ShipRepositoryTestAuthenticated extends AbstractAuthenticatedIntegrationTest {
 
     @Autowired
     private ShipRepository shipRepository;

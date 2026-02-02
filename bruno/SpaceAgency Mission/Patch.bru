@@ -4,22 +4,20 @@ meta {
   seq: 7
 }
 
-put {
+patch {
   url: http://localhost:8080/api/missions
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth-token}}
 }
 
 body:json {
   {
-    "id": 18,
-    "shipId": 4,
-    "departureDate": "2026-01-18T15:42:00",
-    "arrivalDate": "2026-01-18T12:42:00",
-    "origin": "Pluton",
-    "destination": "Neptune",
-    "status": "PLANNED",
-    "maxPassengers": 15
+    "id": 24,
+    "maxPassengers": 2
   }
 }
 

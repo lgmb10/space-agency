@@ -31,7 +31,7 @@ public class BookingService {
 
     private final MissionService missionService;
 
-    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT"})
     @Transactional
     public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, Ship ship,
                                 Passenger passenger) {

@@ -11,7 +11,7 @@ public class AppConfig {
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-        configurer.setLocation(new FileSystemResource(".env"));
+        configurer.setLocations(new FileSystemResource(".env"), new FileSystemResource(".env.test"));
         return configurer;
     }
 

@@ -6,10 +6,12 @@ import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.services.PassengerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
 @RestController
 @RequestMapping("/passengers")
 @RequiredArgsConstructor

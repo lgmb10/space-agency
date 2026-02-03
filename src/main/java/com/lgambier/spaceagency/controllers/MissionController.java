@@ -17,10 +17,12 @@ import com.lgambier.spaceagency.services.ShipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Secured("ROLE_ADMIN")
 @RestController
 @RequestMapping("/missions")
 @RequiredArgsConstructor
@@ -33,16 +35,19 @@ public class MissionController {
     private final PassengerService passengerService;
 
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_OPERATOR"})
     @GetMapping
     public List<MissionDTO> getAllMissions() {
         return missionService.findAll();
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_OPERATOR"})
     @GetMapping("/{missionId}")
     public MissionDTO getOneMission(@PathVariable int missionId) {
         return missionService.findById(missionId);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT", "ROLE_OPERATOR"})
     @GetMapping("/me")
     public List<SanitizedMissionDTO> getPassengerBookingMissionsFromUser() {
         String email = SecurityUtils.getJwtUserEmail();
@@ -53,11 +58,13 @@ public class MissionController {
         return missionService.findPassengerMissions(passenger.getId());
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT", "ROLE_OPERATOR"})
     @GetMapping("/available")
     public List<SanitizedMissionDTO> getAvailableMissions() {
         return missionService.getAvailableMissions();
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MissionDTO createMission(@RequestBody MissionCreateRequestDTO mission) {
@@ -65,12 +72,14 @@ public class MissionController {
         return missionService.create(mission, ship);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
     @PutMapping
     public MissionDTO updateMission(@RequestBody MissionUpdateRequestDTO mission) {
         Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(mission.getShipId()));
         return missionService.update(mission, ship);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
     @PatchMapping
     public MissionDTO patchMission(@RequestBody MissionPatchRequestDTO mission) {
         if(mission.getShipId() != null){
@@ -83,11 +92,13 @@ public class MissionController {
 
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_OPERATOR"})
     @PatchMapping("/status")
     public MissionDTO patchMissionStatus(@Valid @RequestBody MissionUpdateStatusRequestDTO mission) {
         return missionService.patchStatus(mission);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
     @DeleteMapping("/{missionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMission(@PathVariable("missionId") Integer missionId) {

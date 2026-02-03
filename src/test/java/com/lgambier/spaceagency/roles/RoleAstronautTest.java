@@ -4,6 +4,8 @@ import com.lgambier.spaceagency.config.AbstractIntegrationTest;
 import com.lgambier.spaceagency.controllers.AuthController;
 import com.lgambier.spaceagency.dto.auth.AuthRequestDTO;
 import com.lgambier.spaceagency.dto.mission.SanitizedMissionDTO;
+import com.lgambier.spaceagency.models.Booking;
+import com.lgambier.spaceagency.repositories.BookingRepository;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +18,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +48,10 @@ public class RoleAstronautTest extends AbstractIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
 
     @BeforeEach
     void obtainAccessToken() {
@@ -108,9 +117,26 @@ public class RoleAstronautTest extends AbstractIntegrationTest {
                                                                                                 .constructCollectionType(
                                                                                                         List.class,
                                                                                                         SanitizedMissionDTO.class));
-
-
         assertFalse(missionDTOList.isEmpty());
 
+        List<Booking> astronautBookings = bookingRepository.findByPassengerId(1);
+        assertFalse(astronautBookings.isEmpty());
+
+        Set<Integer> missionIdsFromApi = missionDTOList
+                                                 .stream()
+                                                 .map(SanitizedMissionDTO::id)
+                                                 .collect(Collectors.toSet());
+
+        Set<Integer> missionIdsFromBookings = astronautBookings
+                                                      .stream()
+                                                      .map(Booking::getMissionId)
+                                                      .collect(Collectors.toSet());
+
+
+        assertTrue(missionIdsFromApi.containsAll(missionIdsFromBookings),
+                   "A mission from the bookings is missing in the API response");
+
+        assertTrue(missionIdsFromBookings.containsAll(missionIdsFromApi),
+                   "A mission returned by the API does not belong to the astronaut's bookings");
     }
 }

@@ -15,6 +15,7 @@ import com.lgambier.spaceagency.services.PassengerService;
 import com.lgambier.spaceagency.services.ShipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,9 +33,11 @@ public class BookingController {
 
     private final PassengerService passengerService;
 
+    @Secured({"ROLE_ADMIN", "ROLE_ASTRONAUT"})
     @PostMapping("/{missionId}")
     public BookingDTO addPassengerToMission(@PathVariable("missionId") Integer missionId,
                                             @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
+
         Ship ship = ShipMapper.INSTANCE.shipDtotoShip(shipService.findById(missionService
                                                                                    .findById(missionId)
                                                                                    .ship()

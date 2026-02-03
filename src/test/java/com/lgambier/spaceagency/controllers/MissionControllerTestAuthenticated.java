@@ -203,48 +203,4 @@ public class MissionControllerTestAuthenticated extends AbstractAuthenticatedInt
                                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isConflict());
     }
-
-    @Test
-    @Order(11)
-    void addPassengerToMission_whenEverythingIsOk_shouldReturn200() throws Exception {
-        JSONObject validPassengerDataCreation = new JSONObject();
-        validPassengerDataCreation.put("firstName", "toto");
-        validPassengerDataCreation.put("lastName", "tata");
-        validPassengerDataCreation.put("email", "toto@tata.com");
-        validPassengerDataCreation.put("weight", 75);
-        validPassengerDataCreation.put("medicalClearance", true);
-
-        mockMvc
-                .perform(get("/api/passengers").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isOk());
-
-
-        JSONObject mission = new JSONObject(validMissionDataCreation.toString());
-        mission.put("departureDate", LocalDateTime
-                                             .now()
-                                             .plusHours(1)
-                                             .toString());
-
-        mockMvc
-                .perform(post("/api/missions")
-                                 .contentType(MediaType.APPLICATION_JSON)
-                                 .content(mission.toString())
-                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isCreated());
-
-
-        mockMvc
-                .perform(post("/api/missions")
-                                 .contentType(MediaType.APPLICATION_JSON)
-                                 .content(mission.toString())
-                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isCreated());
-
-
-
-
-
-
-    }
-
 }

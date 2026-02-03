@@ -17,7 +17,6 @@ import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -36,7 +35,6 @@ public class MissionService {
     private final TimeProvider timeProvider;
 
 
-    @Secured({"ROLE_ADMIN", "ROLE_OPERATOR"})
     public List<MissionDTO> findAll() {
         List<Mission> missions = missionRepository.findAll();
         return missions
@@ -45,7 +43,6 @@ public class MissionService {
                        .collect(Collectors.toList());
     }
 
-    @Secured({"ROLE_ADMIN", "ROLE_OPERATOR"})
     public MissionDTO findById(int id) {
         Mission mission = missionRepository
                                   .findById(id)
@@ -54,8 +51,7 @@ public class MissionService {
         return MissionMapper.INSTANCE.missionToMissionDto(mission);
     }
 
-    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT", "ROLE_OPERATOR"})
-    public List<SanitizedMissionDTO> findPassengerMissions(Integer passengerId){
+    public List<SanitizedMissionDTO> findPassengerMissions(Integer passengerId) {
         List<Mission> missions = missionRepository.findMissionsByPassengerId(passengerId);
 
         return missions
@@ -64,7 +60,6 @@ public class MissionService {
                        .collect(Collectors.toList());
     }
 
-    @Secured({"ROLE_ADMIN"})
     @Transactional
     public MissionDTO create(MissionCreateRequestDTO missionRequest, Ship ship) {
 
@@ -76,7 +71,7 @@ public class MissionService {
         return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(mission));
     }
 
-    @Secured({"ROLE_ADMIN"})
+
     @Transactional
     public MissionDTO update(MissionUpdateRequestDTO missionRequest, Ship ship) {
         findById(missionRequest.getId());
@@ -89,7 +84,7 @@ public class MissionService {
         return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(mission));
     }
 
-    @Secured({"ROLE_ADMIN"})
+
     @Transactional
     public MissionDTO patch(MissionPatchRequestDTO missionRequest, Ship ship) {
         Mission mission = MissionMapper.INSTANCE.missionDtoToMission(findById(missionRequest.getId()));
@@ -98,7 +93,6 @@ public class MissionService {
         return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(patchedMission));
     }
 
-    @Secured({"ROLE_ADMIN", "ROLE_OPERATOR"})
     @Transactional
     public MissionDTO patchStatus(MissionUpdateStatusRequestDTO missionRequest) {
         Mission mission = MissionMapper.INSTANCE.missionDtoToMission(findById(missionRequest.getId()));
@@ -130,19 +124,19 @@ public class MissionService {
         return MissionMapper.INSTANCE.missionToMissionDto(missionRepository.save(mission));
     }
 
-    @Secured({"ROLE_ADMIN"})
+
     @Transactional
     public void deleteById(Integer id) {
         findById(id);
         missionRepository.deleteById(id);
     }
 
-    @Secured({"ROLE_ADMIN"})
+
     public Integer getTotalPassengersWeight(Integer passengerWeight, Integer missionId) {
         return missionRepository.totalPassengersWeight(passengerWeight, missionId);
     }
 
-    @Secured({"ROLE_ADMIN"})
+
     public Boolean isMissionShipCapacityReached(Integer missionId) {
         return missionRepository.isMissionShipCapacityReached(missionId);
     }
@@ -156,10 +150,12 @@ public class MissionService {
     private void checkDatesOverlap(Integer shipId, Mission mission, Boolean onUpdate) {
         Boolean isOverlapping;
 
-        if(mission.getId() != null){
-            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate(), mission.getId());
-        }else {
-            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate());
+        if (mission.getId() != null) {
+            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(),
+                                                                       mission.getArrivalDate(), mission.getId());
+        } else {
+            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(),
+                                                                       mission.getArrivalDate());
         }
 
         if (isOverlapping) {
@@ -181,7 +177,7 @@ public class MissionService {
         return patchedMission;
     }
 
-    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT", "ROLE_OPERATOR"})
+
     public List<SanitizedMissionDTO> getAvailableMissions() {
         List<Mission> missions = missionRepository.findAvailableMissions(timeProvider.now());
 

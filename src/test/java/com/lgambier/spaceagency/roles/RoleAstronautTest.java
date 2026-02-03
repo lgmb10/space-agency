@@ -3,18 +3,28 @@ package com.lgambier.spaceagency.roles;
 import com.lgambier.spaceagency.config.AbstractIntegrationTest;
 import com.lgambier.spaceagency.controllers.AuthController;
 import com.lgambier.spaceagency.dto.auth.AuthRequestDTO;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import com.lgambier.spaceagency.dto.mission.SanitizedMissionDTO;
+import org.json.JSONObject;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import tools.jackson.databind.ObjectMapper;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestPropertySource(properties = {"spring.flyway.locations=classpath:db/migration,classpath:db/migration-special-test"})
 public class RoleAstronautTest extends AbstractIntegrationTest {
 
     protected String accessToken;
@@ -30,6 +40,9 @@ public class RoleAstronautTest extends AbstractIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void obtainAccessToken() {
@@ -50,5 +63,54 @@ public class RoleAstronautTest extends AbstractIntegrationTest {
         mockMvc
                 .perform(get("/api/passengers").header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isForbidden());
+    }
+
+    @Order(1)
+    @Test
+    void addPassengerToMission_withRoleAstronaut_shouldReturn200() throws Exception {
+        JSONObject passengerBookingData = new JSONObject();
+        passengerBookingData.put("passengerId", 1);
+
+        mockMvc
+                .perform(post("/api/bookings/1")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(passengerBookingData.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Order(2)
+    @Test
+    void getUserBookingMissions_withRoleAstronaut_shouldReturn200_withOnlyAssociatedBookingToUser() throws Exception {
+        JSONObject passengerBookingData = new JSONObject();
+        passengerBookingData.put("passengerId", 2);
+
+        mockMvc
+                .perform(post("/api/bookings/1")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(passengerBookingData.toString())
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+
+
+        MvcResult result = mockMvc
+                                   .perform(get("/api/missions/me").header(HttpHeaders.AUTHORIZATION,
+                                                                           "Bearer " + accessToken))
+                                   .andExpect(status().isOk())
+                                   .andReturn();
+
+        String responseBody = result
+                                      .getResponse()
+                                      .getContentAsString();
+
+        List<SanitizedMissionDTO> missionDTOList = objectMapper.readValue(responseBody, objectMapper
+                                                                                                .getTypeFactory()
+                                                                                                .constructCollectionType(
+                                                                                                        List.class,
+                                                                                                        SanitizedMissionDTO.class));
+
+
+        assertFalse(missionDTOList.isEmpty());
+
     }
 }

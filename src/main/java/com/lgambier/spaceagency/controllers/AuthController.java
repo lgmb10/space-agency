@@ -4,6 +4,8 @@ import com.lgambier.spaceagency.auth.AuthService;
 import com.lgambier.spaceagency.dto.auth.Auth0TokenDTO;
 import com.lgambier.spaceagency.dto.auth.Auth0TokenRequestDTO;
 import com.lgambier.spaceagency.dto.auth.AuthRequestDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentification")
+
 public class AuthController {
 
     private final AuthService authService;
@@ -30,6 +34,7 @@ public class AuthController {
     private String clientSecret;
 
     @PostMapping("/login")
+    @Operation(summary = "Récupérer un token d'authentification")
     public ResponseEntity<String> login(@Valid @RequestBody AuthRequestDTO body) {
         Auth0TokenRequestDTO request = new Auth0TokenRequestDTO("password", body.login(), body.password(), audience,
                                                                 "openid profile email", clientId, clientSecret,

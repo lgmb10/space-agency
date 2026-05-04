@@ -1,0 +1,25 @@
+meta {
+  name: login
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/ships
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "faucon tah",
+    "capacity": 15,
+    "maxWeight": 700,
+    "status": "ACTIVE"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -2,11 +2,18 @@ spring:
   application:
     name: spaceagency
   datasource:
-    url: jdbc:mysql://localhost:3306/space-agency-directory
-    username: springstudent
-    password: springstudent
+    url: "${DATABASE_URL}"
+    username: "${DATABASE_USERNAME}"
+    password: "${DATABASE_PASSWORD}"
   messages:
     encoding: UTF-8
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-2ley7a57j6xbxrle.us.auth0.com/
+          audiences:
+            - "${AUTH0_AUDIENCE}"
 
 flyway:
   enabled: true

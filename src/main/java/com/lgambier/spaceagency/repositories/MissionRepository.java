@@ -72,4 +72,11 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
 
     @Query("SELECT b.mission FROM Booking b WHERE b.passengerId = :passengerId")
     List<Mission> findMissionsByPassengerId(@Param("passengerId") Integer passengerId);
+
+    @Query("""
+            SELECT COALESCE(COUNT(m), 0)
+            FROM Mission m
+            WHERE m.status = 'IN_PROGRESS'
+            """)
+    Integer countInProgressMissions();
 }

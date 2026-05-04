@@ -136,6 +136,9 @@ public class MissionService {
         return missionRepository.totalPassengersWeight(passengerWeight, missionId);
     }
 
+    public Integer countInProgressMissions() {
+        return missionRepository.countInProgressMissions();
+    }
 
     public Boolean isMissionShipCapacityReached(Integer missionId) {
         return missionRepository.isMissionShipCapacityReached(missionId);

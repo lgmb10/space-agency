@@ -1,25 +1,17 @@
 package com.lgambier.spaceagency.dto.ship;
 
 import com.lgambier.spaceagency.enums.ShipStatus;
-import com.lgambier.spaceagency.models.Ship;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ShipDTO {
 
-    private Integer id;
+public record ShipDTO(
 
-    private String name;
+        Integer id,
 
-    private Integer capacity;
+        String name,
 
-    private Integer maxWeight;
+        Integer capacity,
 
-    private ShipStatus status;
+        Integer maxWeight,
+
+        ShipStatus status) {
 }

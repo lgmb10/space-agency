@@ -1,15 +1,14 @@
 package com.lgambier.spaceagency.dto.mission;
 
 import com.lgambier.spaceagency.enums.MissionStatus;
-import com.lgambier.spaceagency.models.Ship;
 
 import java.time.LocalDateTime;
 
-public record MissionDTO(
+public record SanitizedMissionDTO(
 
         Integer id,
 
-        Ship ship,
+        String shipName,
 
         LocalDateTime departureDate,
 
@@ -19,7 +18,5 @@ public record MissionDTO(
 
         String destination,
 
-        MissionStatus status,
-
-        Integer maxPassengers) {
+        MissionStatus status) {
 }

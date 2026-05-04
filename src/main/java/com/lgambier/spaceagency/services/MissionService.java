@@ -2,6 +2,7 @@ package com.lgambier.spaceagency.services;
 
 import com.lgambier.spaceagency.dto.mappers.MissionMapper;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
+import com.lgambier.spaceagency.dto.mission.SanitizedMissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionCreateRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionPatchRequestDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionUpdateRequestDTO;
@@ -16,6 +17,7 @@ import com.lgambier.spaceagency.models.Ship;
 import com.lgambier.spaceagency.repositories.MissionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -31,6 +33,9 @@ public class MissionService {
 
     private final JsonMapper jsonMapper;
 
+    private final TimeProvider timeProvider;
+
+
     public List<MissionDTO> findAll() {
         List<Mission> missions = missionRepository.findAll();
         return missions
@@ -45,6 +50,16 @@ public class MissionService {
                                   .orElseThrow(() -> new MissionNotFoundException(id));
 
         return MissionMapper.INSTANCE.missionToMissionDto(mission);
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT"})
+    public List<SanitizedMissionDTO> findPassengerMissions(Integer passengerId){
+        List<Mission> missions = missionRepository.findMissionsByPassengerId(passengerId);
+
+        return missions
+                       .stream()
+                       .map(MissionMapper.INSTANCE::missionToSanitizedMissionDto)
+                       .collect(Collectors.toList());
     }
 
     @Transactional
@@ -130,7 +145,15 @@ public class MissionService {
     }
 
     private void checkDatesOverlap(Integer shipId, Mission mission, Boolean onUpdate) {
-        if (missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate())) {
+        Boolean isOverlapping;
+
+        if(mission.getId() != null){
+            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate(), mission.getId());
+        }else {
+            isOverlapping = missionRepository.existsOverlappingMission(shipId, mission.getDepartureDate(), mission.getArrivalDate());
+        }
+
+        if (isOverlapping) {
             if (onUpdate) throw new MissionShipTimeSlotAlreadyInUseException().onUpdate();
             else throw new MissionShipTimeSlotAlreadyInUseException();
         }
@@ -149,4 +172,13 @@ public class MissionService {
         return patchedMission;
     }
 
+    public List<SanitizedMissionDTO> getAvailableMissions() {
+        List<Mission> missions = missionRepository.findAvailableMissions(timeProvider.now());
+
+        return missions
+                       .stream()
+                       .map(MissionMapper.INSTANCE::missionToSanitizedMissionDto)
+                       .collect(Collectors.toList());
+
+    }
 }

@@ -24,4 +24,12 @@ public class Booking {
 
     @NotNull
     private Integer missionId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "missionId", insertable = false, updatable = false)
+    private Mission mission;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "passengerId", insertable = false, updatable = false)
+    private Passenger passenger;
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface MissionRepository extends JpaRepository<Mission, Integer> {
@@ -22,11 +23,22 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
     Boolean existsOverlappingMission(@Param("shipId") Integer shipId, @Param("departureDate") LocalDateTime departureDate, @Param("arrivalDate") LocalDateTime arrivalDate);
 
     @Query("""
+                SELECT COUNT(m) > 0
+                FROM Mission m
+                WHERE m.ship.id = :shipId
+                AND m.id != :missionId
+                AND m.departureDate < :arrivalDate
+                AND m.arrivalDate > :departureDate
+                AND m.status != "CANCELLED"
+            """)
+    Boolean existsOverlappingMission(@Param("shipId") Integer shipId, @Param("departureDate") LocalDateTime departureDate, @Param("arrivalDate") LocalDateTime arrivalDate, @Param("missionId") Integer missionId);
+
+    @Query("""
                 SELECT COALESCE(COUNT(m), 0) > 0
                 FROM Mission m
                 WHERE m.ship.id = :shipId
                 AND m.status IN ('PLANNED', 'IN_PROGRESS')
-                AND m.arrivalDate >= now
+                AND m.arrivalDate >= :now
             """)
     Boolean existPlannedOrInProgressMissionForShip(@Param("shipId") Integer shipId, @Param("now") LocalDateTime now);
 
@@ -46,4 +58,18 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
             WHERE m.id = :missionId
     """)
     Boolean isMissionShipCapacityReached(@Param("missionId") Integer missionId);
+
+    @Query("""
+            SELECT m
+            FROM Mission m
+            LEFT JOIN Booking b ON b.missionId = m.id
+            WHERE m.status = 'PLANNED'
+              AND m.arrivalDate >= :now
+            GROUP BY m
+            HAVING COUNT(b) < m.maxPassengers
+    """)
+    List<Mission> findAvailableMissions(@Param("now") LocalDateTime now);
+
+    @Query("SELECT b.mission FROM Booking b WHERE b.passengerId = :passengerId")
+    List<Mission> findMissionsByPassengerId(@Param("passengerId") Integer passengerId);
 }

@@ -1,9 +1,9 @@
 package com.lgambier.spaceagency.services;
 
+import com.lgambier.spaceagency.dto.booking.BookingDTO;
+import com.lgambier.spaceagency.dto.mappers.BookingMapper;
 import com.lgambier.spaceagency.dto.mission.MissionDTO;
 import com.lgambier.spaceagency.dto.mission.request.MissionAddPassengerDTO;
-import com.lgambier.spaceagency.dto.passenger.PassengerDTO;
-import com.lgambier.spaceagency.dto.ship.ShipDTO;
 import com.lgambier.spaceagency.enums.MissionStatus;
 import com.lgambier.spaceagency.exceptions.mission.MissionPassengerAlreadyAffectedToGivenMissionException;
 import com.lgambier.spaceagency.exceptions.mission.MissionShipCapacityExceedsException;
@@ -20,6 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -32,17 +35,33 @@ public class BookingService {
     @Transactional
     public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, Ship ship,
                                 Passenger passenger) {
-        int passengerId = passengerDTO.getPassengerId();
+        int passengerId = passengerDTO.passengerId();
         checkCanAddPassenger(missionId, passengerId, ship, passenger);
 
-        Booking booking = Booking.builder().passengerId(passengerId).missionId(missionId).build();
+        Booking booking = Booking
+                                  .builder()
+                                  .passengerId(passengerId)
+                                  .missionId(missionId)
+                                  .build();
 
         return bookingRepository.save(booking);
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
-    public boolean isPassengerAlreadyAffectedToGivenMission(Integer passengerId, Integer missionId){
-        return bookingRepository.findByPassengerIdAndMissionId(passengerId, missionId).isPresent();
+    public boolean isPassengerAlreadyAffectedToGivenMission(Integer passengerId, Integer missionId) {
+        return bookingRepository
+                       .findByPassengerIdAndMissionId(passengerId, missionId)
+                       .isPresent();
+    }
+
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT"})
+    public List<BookingDTO> getPassengerBookings(Integer passengerId) {
+        List<Booking> bookings = bookingRepository.findByPassengerId(passengerId);
+
+        return bookings
+                       .stream()
+                       .map(BookingMapper.INSTANCE::bookingToBookingDto)
+                       .collect(Collectors.toList());
     }
 
     private void checkCanAddPassenger(Integer missionId, Integer passengerId, Ship ship, Passenger passenger) {
@@ -52,7 +71,7 @@ public class BookingService {
 
         if (isPassengerAlreadyAffectedToGivenMission(passengerId, missionId)) {
             throw new MissionPassengerAlreadyAffectedToGivenMissionException(missionId);
-        } else if (mission.getStatus() != MissionStatus.PLANNED) {
+        } else if (mission.status() != MissionStatus.PLANNED) {
             throw new MissionStatusInvalidToAddPassengerException();
         } else if (!passenger.getMedicalClearance()) {
             throw new PassengerMedicalClearanceInvalidException();

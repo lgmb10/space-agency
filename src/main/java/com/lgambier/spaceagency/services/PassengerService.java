@@ -8,6 +8,8 @@ import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.repositories.PassengerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,4 +75,9 @@ public class PassengerService {
         passengerRepository.deleteById(id);
     }
 
+    public Page<PassengerDTO> getUsersPage(Pageable pageRequest) {
+        return passengerRepository
+                       .findAll(pageRequest)
+                       .map(PassengerMapper.INSTANCE::passengerToPassengerDto);
+    }
 }

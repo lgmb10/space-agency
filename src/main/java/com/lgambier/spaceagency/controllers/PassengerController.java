@@ -5,6 +5,9 @@ import com.lgambier.spaceagency.dto.passenger.SanitizedPassengerDTO;
 import com.lgambier.spaceagency.models.Passenger;
 import com.lgambier.spaceagency.services.PassengerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +22,16 @@ public class PassengerController {
 
     private final PassengerService passengerService;
 
-
     @GetMapping
-    public List<PassengerDTO> getAllPassengers() {
-        return passengerService.findAll();
+    public Page<PassengerDTO> getPassengersPaginated(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                     @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                     @RequestParam(value = "sortBy", defaultValue = "lastName") String sortBy,
+                                                     @RequestParam(value = "direction", defaultValue = "ASC") String direction) {
+
+        Sort sort = direction.equalsIgnoreCase("DESC")
+                            ? Sort.by(sortBy).descending()
+                            : Sort.by(sortBy).ascending();
+        return passengerService.getUsersPage(PageRequest.of(page, pageSize, sort));
     }
 
     @GetMapping("/mission/{missionId}")

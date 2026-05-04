@@ -13,6 +13,8 @@ import com.lgambier.spaceagency.services.BookingService;
 import com.lgambier.spaceagency.services.MissionService;
 import com.lgambier.spaceagency.services.PassengerService;
 import com.lgambier.spaceagency.services.ShipService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
@@ -23,6 +25,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
+@Tag(name = "Bookings", description = "Gestion des réservations")
+
 public class BookingController {
 
     private final BookingService bookingService;
@@ -35,6 +39,7 @@ public class BookingController {
 
     @Secured({"ROLE_ADMIN", "ROLE_ASTRONAUT"})
     @PostMapping("/{missionId}")
+    @Operation(summary = "Ajouter un passager à une mission")
     public BookingDTO addPassengerToMission(@PathVariable("missionId") Integer missionId,
                                             @Valid @RequestBody MissionAddPassengerDTO passengerDTO) {
 
@@ -51,6 +56,7 @@ public class BookingController {
 
 
     @GetMapping
+    @Operation(summary = "Récupérer la liste des réservations d'un passager")
     public List<BookingDTO> getPassengerBookingsFromUser() {
         String email = SecurityUtils.getJwtUserEmail();
 

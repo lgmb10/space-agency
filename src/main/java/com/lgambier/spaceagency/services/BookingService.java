@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -31,7 +32,7 @@ public class BookingService {
 
     private final MissionService missionService;
 
-    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
+    @Secured({"ROLE_ADMIN", "ROLE_PLANNER", "ROLE_ASTRONAUT"})
     @Transactional
     public Booking addPassenger(Integer missionId, MissionAddPassengerDTO passengerDTO, Ship ship,
                                 Passenger passenger) {
@@ -47,7 +48,6 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    @Secured({"ROLE_ADMIN", "ROLE_PLANNER"})
     public boolean isPassengerAlreadyAffectedToGivenMission(Integer passengerId, Integer missionId) {
         return bookingRepository
                        .findByPassengerIdAndMissionId(passengerId, missionId)

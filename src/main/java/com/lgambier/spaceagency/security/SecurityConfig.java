@@ -29,8 +29,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.httpBasic(withDefaults());
-
 
         // disable CSRF, in general not required for stateless REST APIs
         http
@@ -38,12 +36,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                                        .requestMatchers("/api/auth/**")
                                                        .permitAll()
-                                                       .requestMatchers("/api/ships/**")
-                                                       .hasRole("ADMIN")
-                                                       .requestMatchers("/api/passengers/**")
-                                                       .hasRole("ADMIN")
-                                                       .requestMatchers("/api/missions/**")
-                                                       .hasAnyRole("ADMIN", "PLANNER")
                                                        .requestMatchers("/api/**")
                                                        .authenticated())
                 .cors(withDefaults())
